@@ -1,25 +1,30 @@
-// DEPENDENCIES
-const express       = require('express');
-const app           = express();
-//Annie note: currently for every route Im doing res.set('Access-Control-Allow-Origin', 'http://localhost:3000');
-const cors          = require('cors');
+// DEPENDENCIES and GLOBAL MODULES
+require('dotenv').config();
+const express           = require('express');
+const bodyParser        = require('body-parser');
+const cors              = require('cors');
+const app               = express();
+const defineCurrentUser = require('./middleware/defineCurrentUser.js');
+const { Sequelize }     = require('sequelize');
+const db                = require('./models');
 
 
 // CONFIGURATION / MIDDLEWARE
-require('dotenv').config();
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
 app.use(cors());
+app.use(express.static('public'));
+app.use(express.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(defineCurrentUser);
 
 
 //ROUTES
-
-
-
-//CATCHALL ROUTE
+    //CONTROLLER ROUTES
+app.use('/users',          require('./controllers/users'));
+app.use('/authentication', require('./controllers/authentication'));
+    //CATCHALL ROUTE
 app.get('*', (req,res) => {
     res.set('Access-Control-Allow-Origin', 'http://localhost:3000');
-    response.status(404).json({message: 'Page not found'});
+    response.status(404).json({message: 'Request not found'});
 });
 
 //LISTEN

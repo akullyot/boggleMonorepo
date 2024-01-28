@@ -1,0 +1,309 @@
+@use 'variables' as vars;
+@use 'mixins' as mixins;
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display&display=swap');
+
+
+$navFontSize: 20px;
+$navLinkMargins: auto 20px;
+
+//some keyframes
+//TODO convert this to a mixin
+@keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+nav{
+    height: 4rem;
+    width: 100vw;
+    padding: 0px 10px;
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    justify-content: space-between;
+    position: sticky;
+    top: 0px;
+    z-index: 10;
+    background-color: white;
+    //all styling for the navLinks
+    a:not(.homeLink):not(.navButton){
+        text-decoration: none;
+        text-transform: uppercase;
+        color: vars.$purple;
+        font-size: $navFontSize;
+        font-family: vars.$sansFont;
+        margin: $navLinkMargins;
+        display: inline-block;
+        position: relative;
+        //on hover provide an animation effect of underlining
+        &::after{
+            content: '';
+            position: absolute;
+            width: 100%;
+            transform: scaleX(0);
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: vars.$darkPurple;
+            transform-origin: bottom right;
+            transition: transform 0.25s ease-out;
+        }
+        &:hover{
+            color: vars.$darkPurple;
+            font-weight: bold;
+            &::after{
+                transform: scaleX(1);
+                transform-origin: bottom left;
+            }
+        };
+    };
+    //Handling active tab styling, put otu here because navbutton uses it too
+    .navLink.active{
+        color: vars.$darkGrey !important;
+        font-weight: bold !important;
+    }
+    .navButton{
+        text-decoration: none;
+        text-transform: uppercase;
+        color: vars.$purple;
+        font-weight: bold;
+        font-size: $navFontSize;
+        align-items: center;
+        background-color: white;
+        border: 1.5px solid vars.$purple;
+        margin: 0px 10px;
+        padding: 5px 15px;
+        border-radius: 30px;
+        position: relative;
+        &::after{
+            background-color: vars.$purple;
+            border-radius: 30px;
+            content: "";
+            display: block;
+            height: 40px;
+            left: 0;
+            width: 100%;
+            position: absolute;
+            top: -2px;
+            transform: translate(4px, 6px);
+            transition: transform .5s ease-out;
+            z-index: -1;
+        } 
+        &:hover {
+            outline: 0;
+            color: vars.$darkPurple;
+            background-color: vars.$white;
+            &:after{
+                transform: translate(0, 0);
+                background-color: vars.$darkPurple;
+            }
+        }
+    }
+    //all styling for the home navlink
+    #navHome{
+        display: flex;
+        align-items: center;
+        flex-direction: row;
+        justify-content: space-between;
+        font-size: $navFontSize;
+        a{
+            text-decoration: none;
+        }
+    }
+    #navLogo{
+        height: 3rem;
+        width: 3.3rem;
+        margin-top: 5px;
+        &:hover{
+          animation: spin 9.5s linear infinite;  
+        }   
+    }
+    h4{
+        text-decoration: none;
+        text-transform: uppercase;
+        color: vars.$purple;
+        font-size: $navFontSize;
+        font-family: vars.$sansFont;
+        font-weight: 200;
+        position: relative;
+        margin-bottom: -5px;
+        &::after{
+            content: '';
+            position: absolute;
+            width: 100%;
+            transform: scaleX(0);
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: vars.$purple;
+            transform-origin: bottom right;
+            transition: transform 0.25s ease-out;
+        }
+        &:hover{
+            font-weight: bold;
+            &::after{
+                transform: scaleX(1);
+                transform-origin: bottom left;
+            }
+        }
+    }
+    .homeLink
+    {
+        margin: $navLinkMargins;
+    }
+    //Holder for all other navigation
+    .linkHolder{
+        flex-direction: row;
+        font-family: vars.$sansFont;
+        display: flex;
+        list-style: none;
+        padding: 0 0.4vw;
+        padding-left: 0;
+        margin: 0;
+        justify-content: space-evenly;
+        align-items: center;
+    };
+    //The hamburger that only shows at small enough screen width
+    .hamburger div{
+        width: 35px;
+        height:3px;
+        background: vars.$purple;
+        margin: 5px;
+        transition: all 0.3s ease;
+        &:hover{
+            color: vars.$darkPurple;
+        }
+    }
+    .hamburger
+    {
+    display: none;
+    }
+    .hiddenImage{
+        display: none;
+    }
+    /*Stying for small screens*/
+    @media (max-width: 1150px){
+        .hamburger{
+            display:block;
+            position: absolute;
+            cursor: pointer;
+            right: 5%;
+            top: 50%;
+            transform: translate(-5%, -50%);
+            z-index: 2;
+            transition: all 0.7s ease;
+        }
+        /*Animating Hamburger Icon on Click*/
+        .toggle .line1{
+            transform: rotate(-45deg) translate(-5px,6px);
+        }
+        .toggle .line2{
+            transition: all 0.7s ease;
+            width:0;
+        }
+        .toggle .line3{
+            transform: rotate(45deg) translate(-5px,-6px);
+        }
+        .linkHolder{
+            position: fixed;
+            top: 0px;
+            margin: 0px;
+            margin-top: 4rem;
+            left: 0px;
+            background: vars.$white;
+            height: 500vh;
+            width: 100%;
+            flex-direction: column;
+            transition: all 1s ease-out;
+            pointer-events: none;
+            opacity: 0;
+            &.open{
+                pointer-events: all; 
+                height: 100vh;
+                opacity: 1;
+            }
+            //all contained links are 0 until opened
+            li{
+                opacity: 0;
+                &.fading{
+                    opacity: 1;
+                }
+            }
+        }
+    }
+}
+//handling images in hamburger section
+#hamburgerGraphicRight, #hamburgerGraphicLeft{
+    display: none;
+    height: 10vh;
+    -webkit-filter: invert(37%) sepia(15%) saturate(1045%) hue-rotate(262deg) brightness(88%) contrast(89%);
+    filter: invert(37%) sepia(15%) saturate(1045%) hue-rotate(262deg) brightness(88%) contrast(89%);
+}
+#hamburgerGraphicRight{
+    bottom: calc(10px + 12vh);
+    left: 100px;
+}
+#hamburgerGraphicLeft{
+    top: calc(10px + 10vh);
+    right: 100px;
+}
+.imageFading{
+    display: inline-block !important;
+    position: absolute;
+}
+
+//At super small screen sizes the practice text overlaps
+@media (max-width: 448px){
+    nav{
+        height: 6rem;
+    }
+    .linkHolder{
+        margin-top: 6rem !important;
+    }
+    #navHome{
+        flex-direction: column !important;
+    }
+}
+//dealing with the nav images
+@media (max-width: 624px){
+    #hamburgerGraphicRight{
+        bottom: calc(10px + 12vh);
+        left: 40px;
+    }
+    #hamburgerGraphicLeft{
+        top: calc(10px + 10vh);
+        right: 40px;
+    }
+}
+@media (max-width: 502px){
+    #hamburgerGraphicRight, #hamburgerGraphicLeft{
+        height: 7vh
+    }
+}
+
+
+#verticalNav{
+    background-color: white;
+    border-top: none;
+    border-radius: 0px;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    width: 200px;
+    background-color: white;
+    height: 100%; /* Full height */
+    position: fixed; /* Make it stick, even on scroll */
+    overflow: auto; /* Enable scrolling if the sidenav has too much content */
+    top: 4rem;
+    z-index: 20;
+    color: vars.$purple;
+    font-family: vars.$sansFont;
+    a{
+        color: vars.$purple;
+    }
+}
+

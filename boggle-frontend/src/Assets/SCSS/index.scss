@@ -1,0 +1,115 @@
+
+//Base Page Styling
+@forward 'navbar';
+@use 'variables' as vars;
+@use 'mixins' as mixins;
+//Universal Styling
+*{
+    margin:0px;
+    padding:0px;
+    box-sizing: border-box;
+}
+body{
+    background-color: vars.$white;
+    overflow-x: hidden;
+    font-family: vars.$sansFont;
+}
+.App{
+    background-color: vars.$white;
+    min-height: 100vh;
+}
+.tab{
+    display: inline-block;
+    margin-left: 20px;
+}
+.button{
+    text-decoration: none;
+    text-transform: uppercase;
+    color: vars.$purple;
+    font-family: vars.$sansFont;
+    font-weight: bold;
+    font-size: 1.5rem;
+    align-items: center;
+    background-color: white;
+    border: 1.5px solid vars.$purple;
+    margin: 20px 10px;
+    padding: 5px 15px;
+    border-radius: 30px;
+    position: relative;
+    &::after{
+        background-color: vars.$purple;
+        border-radius: 30px;
+        content: "";
+        display: block;
+        height: 40px;
+        left: 0;
+        width: 100%;
+        position: absolute;
+        top: -2px;
+        transform: translate(4px, 6px);
+        transition: transform .5s ease-out;
+        z-index: -1;
+    } 
+    &:hover {
+        outline: 0;
+        color: vars.$darkPurple;
+        background-color: vars.$white;
+        &:after{
+            transform: translate(0, 0);
+            background-color: vars.$darkPurple;
+        }
+    }
+}
+main{
+    margin-left: 250px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+.form{
+    width: 80%;
+    @include mixins.roundedboxShadow();
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-family: vars.$sansFont;
+    margin-top: 60px;
+    h1{
+        text-transform: uppercase;
+        padding: 40px;
+        color: vars.$darkPurple;
+    }
+    .formGroup{
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        padding: 30px;
+        justify-content: center;
+        label{
+            text-transform: uppercase;
+            width: 250px !important;
+            margin-right: 20px;
+            color: vars.$darkPurple;
+            font-size: larger;
+        }
+        input{
+            width: 600px;
+        }
+        .invalid-feedback{
+            margin-left: 20px;
+        }
+
+    }
+}

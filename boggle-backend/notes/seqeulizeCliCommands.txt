@@ -1,0 +1,10 @@
+## The database name
+    Boggle
+## Table Names are always Capitalized_Snake_Case and plural
+## Model Names are always Capitalized_Snake_Case and singular
+## Column names are camelCased
+
+
+
+
+npx sequelize db:migrate
