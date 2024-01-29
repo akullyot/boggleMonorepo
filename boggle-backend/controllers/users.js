@@ -7,7 +7,7 @@ const jwt               = require('json-web-token');
 const { User_Auth } = db;
 
 
-//Purpose: on signup create a new user
+//Purpose: POST on signup create a new user
 users.post('/', async (req, res) => {
     //Backend Validation => first check the inputs arent something wild, then do a find to the database to see if anything matches and then deny if they arent unique
         //Note for muself: https://regexr.com was used to generate these
@@ -70,8 +70,15 @@ users.post('/', async (req, res) => {
         //TODO NO IDEA ON THE CORRECT STATUS CODE
         return res.status(406).json({message: error});
     };
-});   
-//Purpose: gets a list of all users, will likely be used later
+});  
+//Purpose: GET user information for their individual profile
+//todo here: check if its their profile or someone elses, if it is someone elses also check if they are your friend
+// Purpose: POST on editing user information
+
+
+
+
+//Purpose: gets a list of all users, will likely be used later for searching for friends
 users.get('/', async (req, res) => {
     const users = await UserAuth.findAll()
     res.json(users)

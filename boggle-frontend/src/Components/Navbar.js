@@ -1,75 +1,125 @@
-//Import required hooks and dependencies
+//Import in all required hooks, contexts,  and dependencies
 import { useState, useContext } from 'react'
-import { HashLink, NavHashLink } from 'react-router-hash-link'; 
-import { CurrentUser } from '../Contexts/CurrentUser';
-//Required Media
+import { CurrentUser }          from '../Contexts/CurrentUser';
+import { useNavigate }          from 'react-router';
+//Import in all required media
 import logo from '../Assets/Images/blocks.png';
-//Required Bootstrap
+//Import in all required bootstrap components
+import Container from 'react-bootstrap/Container';
+import Navbar from 'react-bootstrap/Navbar';
+import Nav from 'react-bootstrap/Nav';
+import Button from 'react-bootstrap/Button';
+import NavDropdown from 'react-bootstrap/NavDropdown';
 import Toast from 'react-bootstrap/Toast';
 
-export default function Navbar(){
-  //State Variables
-    //Purpose: These three states handle hamburger functionality
-    let [linksFading, setLinksFading] = useState(false);
-    let [navLinkOpen, setNavLinkOpen] = useState(false);
-    let [hamburgerToggle, setHamburgerToggle] = useState(false);
-    //Handles Opening the Hamburger
-    const handleHamburgerClick = () => {
-    setLinksFading(!linksFading);
-    setNavLinkOpen(!navLinkOpen);
-    setHamburgerToggle(!hamburgerToggle);
-    };
-    //Handles Showing correct Login/Signup or User Profiles
-    const [logoutToastShow, setLogoutToastShow] = useState(false);
-    const { setCurrentUser, currentUser } = useContext(CurrentUser);
-    const handleSignOut = () => {
+
+function Nav2() {
+    // All button actions 
+    const navigate = useNavigate();
+    const handleSignOut = (e) => {
+        //e.preventDefault()
         localStorage.clear();
         setCurrentUser(null)
         //Give a toast message that they logged out and navigate to home 
         setLogoutToastShow(true)
-
-
     }
-    let loginLinks = (            
-        <ul className={navLinkOpen ? 'linkHolder open': 'linkHolder'}>
-            <li  className={linksFading ? 'fading': null} ><NavHashLink className='navLink navButton' id='contact' to='/login/#' >Log In / Sign Up</NavHashLink></li>
-        </ul>
+    const handleSignInRedirect = () => {
+        navigate('/login')
+    }
+    //The two toggleable states for being logged in 
+    const [logoutToastShow, setLogoutToastShow] = useState(false);
+    const { setCurrentUser, currentUser } = useContext(CurrentUser);
+
+    let loginActions = (
+        <Button variant="outline-success" onClick={handleSignInRedirect}>Log In / Sign Up</Button>
     );
+    //redefine if signed in
     if (currentUser) {
-        loginLinks = (
-            <ul className={navLinkOpen ? 'linkHolder open': 'linkHolder'}>
-                <li  className={linksFading ? 'fading': null} ><button className='navLink navButton' id='contact' onClick={handleSignOut}>Sign out</button></li>
-            </ul>
-        )
-    }
+        loginActions = (     
+                <Nav>
+                    <Navbar.Brand href={`/profile/${currentUser.userName}`}>
+                    <img
+                    alt=""
+                    src={logo}
+                    width="35"
+                    height="35"
+                    className="rounded me-2 align-top"
+                    />{' '}
+                    </Navbar.Brand>
+                    <NavDropdown title={`Signed in as:   ${currentUser.firstName} ${currentUser.lastName}`} id="collapsible-nav-dropdown">
+                        <NavDropdown.Item href="#action/3.1">My Social profile</NavDropdown.Item>
+                        <NavDropdown.Item href="#action/3.2">
+                            My games
+                        </NavDropdown.Item>
+                        <NavDropdown.Item href="#action/3.3"> My friends </NavDropdown.Item>
+                        <NavDropdown.Divider />
+                            <Button variant="outline-success" onClick = {handleSignOut}>Sign Out</Button>
+                        </NavDropdown>
+                    
+                </Nav>);
+    };
+  return (
+    <>
+        <Navbar className="bg-body-tertiary" bg="dark" data-bs-theme="dark" collapseOnSelect expand="lg">
+            <Container>
+                <Navbar.Brand href="/#">
+                    <img
+                        alt=""
+                        src={logo}
+                        width="35"
+                        height="35"
+                        className="d-inline-block align-md"
+                    />{'     Boggle'}
+                    <img
+                        alt=""
+                        src={logo}
+                        width="35"
+                        height="35"
+                        className="d-inline-block align-md"
+                    />
+                </Navbar.Brand>
+                <Navbar.Toggle aria-controls="responsive-navbar-nav" />
+                <Navbar.Collapse id="responsive-navbar-nav">
+                    <Nav className="me-auto">
+                        <Nav.Link href="#features">Leaderboards</Nav.Link>
+                        <Nav.Link href="#pricing"> Something</Nav.Link>
+                        <NavDropdown title="Single Player" id="collapsible-nav-dropdown">
+                        <NavDropdown.Item href="#action/3.1">Action</NavDropdown.Item>
+                        <NavDropdown.Item href="#action/3.2">
+                            Another action
+                        </NavDropdown.Item>
+                        <NavDropdown.Item href="#action/3.3">Something</NavDropdown.Item>
+                        <NavDropdown.Divider />
+                        <NavDropdown.Item href="#action/3.4">
+                            Separated link
+                        </NavDropdown.Item>
+                        </NavDropdown>
+                        <NavDropdown title="Multi Player" id="collapsible-nav-dropdown">
+                        <NavDropdown.Item href="#action/3.1">Action</NavDropdown.Item>
+                        <NavDropdown.Item href="#action/3.2">
+                            Another action
+                        </NavDropdown.Item>
+                        <NavDropdown.Item href="#action/3.3">Something</NavDropdown.Item>
+                        <NavDropdown.Divider />
+                        <NavDropdown.Item href="#action/3.4">
+                            Separated link
+                        </NavDropdown.Item>
+                        </NavDropdown>
+                    </Nav>
+                    {loginActions}
+                </Navbar.Collapse>
+            </Container>
+        </Navbar>
+        <Toast onClose={() => setLogoutToastShow(false)} show={logoutToastShow} delay={6000} autohide style = {{position:'fixed', right: '40px', top: '7rem', width:'600px', height:'200px', zIndex:'10'}}  data-bs-theme="dark" bg='success'>
+            <Toast.Header>
+            <img src={logo} style = {{height:'40px'}} className="rounded me-2" alt="" />
+            <strong className="me-auto">Boggle</strong>
+            <small>Now</small>
+             </Toast.Header>
+            <Toast.Body> Logout successful, bye! </Toast.Body>
+        </Toast>
+    </>
+  );
+}
 
-    return(
-        <nav>
-            <Toast onClose={() => setLogoutToastShow(false)} show={logoutToastShow} delay={6000} autohide style = {{position:'fixed', right: '40px', top: '7rem', width:'600px', height:'200px', zIndex:'10'}} bg='success'>
-                    <Toast.Header>
-                        <img src={logo} style = {{height:'40px'}} className="rounded me-2" alt="" />
-                        <strong className="me-auto">Boggle</strong>
-                        <small>Now</small>
-                    </Toast.Header>
-                <Toast.Body> Logout successful, bye! </Toast.Body>
-            </Toast>
-            <div id= "navHome">
-                <HashLink to='/#' className="homeLink">
-                    <img id='navLogo' src={logo} alt="boggle logo"/>                    
-                </HashLink>
-                <HashLink to='/#' className="homeLink">
-                    <h4 id='navPracticeName'> Boggle </h4>
-                </HashLink>
-            </div>
-            {
-                //only shows when the screen size is small enough width
-            }
-            <div onClick={handleHamburgerClick} className={hamburgerToggle ? 'hamburger toggle': 'hamburger'} >
-              <div className="line1"></div>
-              <div className="line2"></div>
-              <div className="line3"></div>
-            </div> 
-            {loginLinks}
-        </nav>
-    )
-};
+export default Nav2;
