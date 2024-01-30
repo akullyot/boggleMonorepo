@@ -13,7 +13,7 @@ import NavDropdown from 'react-bootstrap/NavDropdown';
 import Toast from 'react-bootstrap/Toast';
 
 
-function Nav2() {
+export default function Navigationbar() {
     // All button actions 
     const navigate = useNavigate();
     const handleSignOut = (e) => {
@@ -31,7 +31,7 @@ function Nav2() {
     const { setCurrentUser, currentUser } = useContext(CurrentUser);
 
     let loginActions = (
-        <Button variant="outline-success" onClick={handleSignInRedirect}>Log In / Sign Up</Button>
+        <Button variant="outline-light" onClick={handleSignInRedirect}>Log In / Sign Up</Button>
     );
     //redefine if signed in
     if (currentUser) {
@@ -53,7 +53,7 @@ function Nav2() {
                         </NavDropdown.Item>
                         <NavDropdown.Item href="#action/3.3"> My friends </NavDropdown.Item>
                         <NavDropdown.Divider />
-                            <Button variant="outline-success" onClick = {handleSignOut}>Sign Out</Button>
+                            <Button variant="outline-light" onClick = {handleSignOut}>Sign Out</Button>
                         </NavDropdown>
                     
                 </Nav>);
@@ -82,7 +82,7 @@ function Nav2() {
                 <Navbar.Collapse id="responsive-navbar-nav">
                     <Nav className="me-auto">
                         <Nav.Link href="#features">Leaderboards</Nav.Link>
-                        <Nav.Link href="#pricing"> Something</Nav.Link>
+                        <Nav.Link href="#pricing"> Browse Users </Nav.Link>
                         <NavDropdown title="Single Player" id="collapsible-nav-dropdown">
                         <NavDropdown.Item href="#action/3.1">Action</NavDropdown.Item>
                         <NavDropdown.Item href="#action/3.2">
@@ -95,7 +95,7 @@ function Nav2() {
                         </NavDropdown.Item>
                         </NavDropdown>
                         <NavDropdown title="Multi Player" id="collapsible-nav-dropdown">
-                        <NavDropdown.Item href="#action/3.1">Action</NavDropdown.Item>
+                        <NavDropdown.Item href="/createRoom"> Create a Room </NavDropdown.Item>
                         <NavDropdown.Item href="#action/3.2">
                             Another action
                         </NavDropdown.Item>
@@ -120,6 +120,4 @@ function Nav2() {
         </Toast>
     </>
   );
-}
-
-export default Nav2;
+};

@@ -1,13 +1,16 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useContext}    from "react"
+import { CurrentUser }            from "../Contexts/CurrentUser"
 
-export default function Chat( {socket, username, room}){
+export default function Chat( {socket, room}){
+    const { currentUser } = useContext(CurrentUser);
+    const userName = currentUser.userName;
     const [currentMessage, setCurrentMessage] = useState("");
     const handleSendMessage = async () => {
         if (currentMessage !== ""){
             //actual message, the username, and the time they sent it
             const messageData = {
                 room: room,
-                author: username,
+                author: userName,
                 message: currentMessage,
                 time: new Date().getHours() + ":" + new Date().getMinutes()
             };
@@ -19,7 +22,7 @@ export default function Chat( {socket, username, room}){
         socket.on("recieveMessage", (recievedData) => {
             console.log(recievedData);
         });
-        
+
     }, [socket])
     return(
         <div>

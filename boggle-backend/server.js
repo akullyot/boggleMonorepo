@@ -27,25 +27,92 @@ const io = new Server(server, {cors : {
     methods: ["GET", "POST"] 
 }});
 
+//Global socket variables
+//Purpose: stores room information: roomid is the main key, the rest are the nest objects vars
+    //Users:     all usernames of users currently present in a room
+    //maxSize:   the creator can specify the size of the room
+    //isPrivate: if the user sets it to private only those that are friends with them can join
+    //               //TODO in the future: seperate this into 2, show on public search screen or anyone with room id can join
+    //               //These games will also not show on the public find rooms section
+    //creatorUsername: the username of creator, used for private db querying
+    //isInProgress: stops others from entering
+const allRooms = {};
+
 io.on("connection", (socket) => {
-    //Lets keep track of every room and the number of clients within each room
-    const numberOfClientsPerRoom = {};
     console.log(socket.id, 'socketID');
-    //Purpose: when you join or create a room, this will create the room and add it to the 
-    //         number of clients per room, and update anyone else currently in the room that another joined
-    socket.on("joinRoom", (room) => {
-        socket.join(room);
-        //lets five this a specific room name for disconnecting
-        socket.room = room;
-        console.log(`user with ID ${socket.id} joined room ${room}`);
-        //add to our room Counter
-        if (numberOfClientsPerRoom[room] === undefined){
-            numberOfClientsPerRoom[room];
+    //SOCKET EMITTER AND RECIEVERS
+
+    socket.on("joinRoom", async (roomStreamedInfo) => {
+        //check if they are the creator
+        if (roomStreamedInfo.isCreator){
+            try {
+                //check that they didnt do a duplicate name 
+                if (allRooms[roomStreamedInfo.roomId]){
+                    throw 'Room id already exists'
+                }else{
+                    //add to your room object
+                    allRooms[roomStreamedInfo.roomId] = {
+                        users           : [roomStreamedInfo.userName],
+                        maxSize         : roomStreamedInfo.maxSize,
+                        isPrivate       : roomStreamedInfo.isPrivate,
+                        creatorUsername : roomStreamedInfo.userName,
+                        isInProgress    : false
+                    }
+                    //establish this id as having joined the room
+                    await socket.join(roomStreamedInfo.roomId);
+                    socket.room = roomStreamedInfo.roomId
+
+                    //emit over to the room that a person has joined
+                    console.log(`user with ID ${socket.id} made room ${roomStreamedInfo.roomId}`);
+                    socket.to(roomStreamedInfo.roomId).emit("recieveRoomCount", "test")  
+                    
+                }
+            } catch (error) {
+                //throwing an error will emit a socket error message eventually in the catch
+                console.error('error in creating a room' + error);
+            }
         }else{
-            numberOfClientsPerRoom[room]++;
-        }
-        //send over to the current users in the room how mnay are present
-        socket.to(room).emit("roomCount", numberOfClientsPerRoom[room])
+            //NOTE: A non room creator just sends over their username and the room id
+            try {
+                //check if they asked to join a room that exists
+                if (!allRooms[roomStreamedInfo.roomId]){
+                    throw 'this room does not exist';
+                }else{
+                    //for readability
+                    const roomToJoin = allRooms[roomStreamedInfo.roomId]
+                    if (roomToJoin.isInProgress){
+                        throw 'game is already in progress'
+                    };
+                    if (roomToJoin.maxSize >= roomToJoin.users.length){
+                        throw 'game is full'
+                    };
+                    if (roomToJoin.isPrivate){
+                        const creatorUsername = roomToJoin.creator;
+                        const joinerUsername =  roomStreamedInfo.userName;
+                        //Need to make the data table first before you can actually do this lol
+                        //TODO
+                        roomToJoin.users.push(roomStreamedInfo.userName)
+                        socket.join(roomStreamedInfo.roomId);
+                        socket.room = roomStreamedInfo.roomId; //TODO look this up, feels redundant
+                        //emit over to the room that a person has joined
+                        socket.to(roomStreamedInfo.roomId).emit("recieveRoomCount", roomToJoin)  
+                        console.log(`user with ID ${socket.id} joined room ${roomStreamedInfo.roomId}`);
+                    }else{
+                        //you are good to join
+                        //establish this id as having joined the room
+                        roomToJoin.users.push(roomStreamedInfo.userName)
+                        socket.join(roomStreamedInfo.roomId);
+                        socket.room = roomStreamedInfo.roomId; //TODO look this up, feels redundant
+                        //emit over to the room that a person has joined
+                        socket.to(roomStreamedInfo.roomId).emit("recieveRoomCount", roomToJoin)  
+                        console.log(`user with ID ${socket.id} joined room ${roomStreamedInfo.roomId}`);
+                    };
+                };
+            } catch (error) {
+                //eventually need to write a socket to handle this
+                console.error(error)
+            };
+        };
     });
 
     socket.on("sendMessage", (messageData) => {

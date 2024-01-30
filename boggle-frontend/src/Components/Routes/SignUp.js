@@ -4,8 +4,9 @@ import { useNavigate }                         from "react-router-dom";
 import { CurrentUser }                            from "../../Contexts/CurrentUser";
 
 //Import in required bootstrap
-import Form  from 'react-bootstrap/Form';
 import Toast from 'react-bootstrap/Toast';
+import Button from 'react-bootstrap/Button';
+import Form from 'react-bootstrap/Form';
 //Import in all required media
 import logo from '../../Assets/Images/blocks.png';
 
@@ -17,44 +18,59 @@ export default function SignUp() {
 		firstName: '',
 		lastName: '',
 		email: '',
-        userName:'',
-		password: ''
+        username:'',
+		password: '',
+        passwordRepeat: ''
 	});
     //Error Handling
     const [validated, setValidated] = useState(false);
     const [errorToastShow, setErrorToastShow] = useState(false);
     const [errorMessage, setErrorMessage] = useState(null);
-    console.log(currentUser)
     //Form submission handling
 	async function handleSubmit(e) {
-        //send over to backend for validation
-		e.preventDefault();
-        const form = e.currentTarget;
-        if (form.checkValidity() === false) {
-          e.preventDefault();
-          e.stopPropagation();
-        }
-        setValidated(true);
-		const response = await fetch(`http://localhost:5000/users/`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify(user)
-		});
-        const data = await response.json()
-        if (response.status === 200) {
-            //Now we need to get our token 
-            setCurrentUser(data.user)
-            localStorage.setItem('token', data.token);
-            console.log(currentUser, 'in signup')
-            navigate(`/`);
-        } else {
-            //there was an error, show the toast message
-            console.log('here')
-            setErrorToastShow(true)
-            setErrorMessage(data.message);
-            console.log(errorMessage, errorToastShow)
+        try {
+            //send over to backend for validation
+            e.preventDefault();
+            const form = e.currentTarget;
+            if (user.password !== user.passwordRepeat){
+                throw 'Passwords do not match'
+            }
+            if (form.checkValidity() === false) {
+                e.preventDefault();
+                e.stopPropagation();
+                setValidated(true);
+                throw 'invalid input'
+            }
+            setValidated(true);
+            const response = await fetch(`http://localhost:5000/users/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(user)
+            });
+            const data = await response.json()
+            if (response.status === 200) {
+                //Now we need to get our token 
+                setCurrentUser(data.user)
+                localStorage.setItem('token', data.token);
+                navigate(`/`);
+            } else {
+                //there was an error, show the toast message
+                setErrorToastShow(true)
+                setErrorMessage(data.message);
+                console.log(errorMessage, errorToastShow)
+            }
+            
+        } catch (error) {
+            if(error == 'Passwords do not match'){
+                setErrorToastShow(true)
+                setErrorMessage(error);
+            }else if (error !== 'invalid input'){
+                setErrorToastShow(true)
+                console.log(`This error occured: ${error}`);
+                setErrorMessage('An error occured, please try again');
+            }
         }
 	}
 	return (
@@ -67,9 +83,9 @@ export default function SignUp() {
                     </Toast.Header>
                 <Toast.Body> {errorMessage}  </Toast.Body>
             </Toast>
-			<Form noValidate validated={validated} onSubmit={handleSubmit} className="form">
-                <h1>Create a new boggle account</h1>
-                <div className="formGroup">
+			<Form noValidate validated={validated} onSubmit={handleSubmit} className=" p-5 mb-2 bg-dark bg-gradient text-white form">
+                <h1> Create a new boggle account</h1>
+                <Form.Group className="mb-5">
                     <label htmlFor="firstName">First Name</label>
                     <input
                         required
@@ -83,9 +99,9 @@ export default function SignUp() {
                     <Form.Control.Feedback type="invalid">
                         First names must be 1-20 characters and only contain letters.
                      </Form.Control.Feedback>
-                </div>
+                </Form.Group>
 
-                <div className="formGroup">
+                <Form.Group className="mb-5">
                     <label htmlFor="lastName">Last Name</label>
                     <input
                         required
@@ -100,8 +116,8 @@ export default function SignUp() {
                     <Form.Control.Feedback type="invalid">
                         Last names must be 1-20 characters and only contain letters.
                      </Form.Control.Feedback>
-                </div>
-                <div className="formGroup">
+                </Form.Group>
+                <Form.Group className="mb-5">
                     <label htmlFor="email">Email</label>
                     <input
                         type="email"
@@ -115,23 +131,23 @@ export default function SignUp() {
                     <Form.Control.Feedback type="invalid">
                        Please input a valid email.
                     </Form.Control.Feedback>
-                </div>
-                <div className="formGroup">
-                    <label htmlFor="userName">Username</label>
+                </Form.Group>
+                <Form.Group className="mb-5">
+                    <label htmlFor="username">username</label>
                     <input
                         required
-                        value={user.userName}
-                        onChange={e => setUser({ ...user, userName: e.target.value })}
+                        value={user.username}
+                        onChange={e => setUser({ ...user, username: e.target.value })}
                         className="form-control"
-                        id="userName"
-                        name="userName"
+                        id="username"
+                        name="username"
                         pattern="^(?=.{6,30}$)(?:[a-zA-Z0-9\d]+(?:(?:\.|-|_|@)[a-zA-Z0-9\d])*)+$"
                     />
                     <Form.Control.Feedback type="invalid">
-                        Usernames must be 6-30 characters long, only include letters, numbers, dashes, underscores, and at symbols, and start and end with a letter or number
+                        usernames must be 6-30 characters long, only include letters, numbers, dashes, underscores, and at symbols, and start and end with a letter or number
                      </Form.Control.Feedback>
-                </div>
-				<div className="formGroup">
+                </Form.Group>
+                <Form.Group className="mb-5">
 					<label htmlFor="password">Password</label>
 					<input
 						type="password"
@@ -147,25 +163,26 @@ export default function SignUp() {
                     <Form.Control.Feedback type="invalid">
                         Passwords must be at minimum eight characters.
                     </Form.Control.Feedback>
-    			</div>
-                <div className="formGroup">
+    			</Form.Group>
+                <Form.Group className="mb-5">
 					<label htmlFor="password">Confirm Password</label>
 					<input
 						type="password"
 						required
-						value={user.password}
-						onChange={e => setUser({ ...user, password: e.target.value })}
+						value={user.passwordRepeat}
+						onChange={e => setUser({ ...user, passwordRepeat: e.target.value })}
 						className="form-control"
-						id="password"
-						name="password"
-                        //pattern="^(?=.*[A-Za-z])(?=.*\d)(?=.*[^\w\s]).{8,}$"
-                        pattern="^.{8,}$"
+						id="passwordRepeat"
+						name="passwordRepeat"
+                        isValid = {user.password === user.passwordRepeat} //not working
 					/>
                     <Form.Control.Feedback type="invalid">
                         Passwords must match.
                     </Form.Control.Feedback>
-    			</div>
-				<input className="button" type="submit" value="Sign Up" />
+    			</Form.Group>
+                <Button variant="outline-light" size="lg" type="submit" className="mb-5">
+                    Sign Up
+                </Button>
 			</Form>
 		</main>
 	);

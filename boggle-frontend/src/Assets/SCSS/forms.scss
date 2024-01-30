@@ -1,0 +1,18 @@
+@use 'variables' as vars;
+@use 'mixins' as mixins;
+
+
+.form{
+    width: max-content;
+    margin: 80px auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 20px;
+    @include mixins.roundedboxShadow();
+    h1{
+        padding: 20px 100px;
+        text-transform: uppercase;
+    }
+}

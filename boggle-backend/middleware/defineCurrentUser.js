@@ -14,7 +14,7 @@ async function defineCurrentUser(req, res, next){
                     userId: id
                 }
             })
-            const userObj = {firstName: user.firstName, lastName: user.lastName, email: user.email, userName: user.userName}
+            const userObj = {firstName: user.firstName, lastName: user.lastName, email: user.email, username: user.username}
             req.currentUser = userObj;
         }else{
             req.currentUser = null;

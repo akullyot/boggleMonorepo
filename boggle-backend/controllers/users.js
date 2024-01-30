@@ -11,15 +11,15 @@ const { User_Auth } = db;
 users.post('/', async (req, res) => {
     //Backend Validation => first check the inputs arent something wild, then do a find to the database to see if anything matches and then deny if they arent unique
         //Note for muself: https://regexr.com was used to generate these
-        //Username rules: must be unique, 6-30 chars long, a-z 0-9, can have @, ., -, _
+        //username rules: must be unique, 6-30 chars long, a-z 0-9, can have @, ., -, _
         //as well, it must end and start with a letter or number
         //Name Rules: A-Z a-z 1-20 characters
         //Password Rules: minimum eight characters, at least one letter, one number, one special char
     try {
         const validitionCriteria = [
-            {input: req.body.userName,
+            {input: req.body.username,
                 regex: new RegExp('^(?=.{6,30}$)(?:[a-zA-Z0-9\d]+(?:(?:\.|-|_|@)[a-zA-Z0-9\d])*)+$'),
-                customError: 'Usernames must be 6-30 characters long, only include letters, numbers, dashes, underscores, and at symbols, and start and end with a letter or number'
+                customError: 'usernames must be 6-30 characters long, only include letters, numbers, dashes, underscores, and at symbols, and start and end with a letter or number'
             },
             {input: req.body.email,
                 regex: new RegExp("^[^@]+@[^@]+\.[^@]+$"),
@@ -45,7 +45,7 @@ users.post('/', async (req, res) => {
             }
         });
         //no repeat passwords or usernames
-        duplicateChecks = [{input: req.body.userName, column: 'userName', error: 'Username is already taken.'}, {input: req.body.email, column: 'email', error: 'An account already exists with this email.'}];
+        duplicateChecks = [{input: req.body.username, column: 'username', error: 'username is already taken.'}, {input: req.body.email, column: 'email', error: 'An account already exists with this email.'}];
         for (const value of duplicateChecks){
             const foundResult = await User_Auth.findOne({where: { [value.column] : value.input}});
             if (foundResult !== null){
@@ -63,7 +63,7 @@ users.post('/', async (req, res) => {
         });
         //If this succeeds lets now make a token to send over for us to stay logged in
         const result = await jwt.encode(process.env.JWT_SECRET, {id: user.userId});
-        const userObj = {firstName: user.firstName, lastName: user.lastName, email: user.email, userName: user.userName}
+        const userObj = {firstName: user.firstName, lastName: user.lastName, email: user.email, username: user.username}
         res.status(200).json({ user:userObj, token: result.value })
     } catch (error) {
         console.error(error);
@@ -80,7 +80,7 @@ users.post('/', async (req, res) => {
 
 //Purpose: gets a list of all users, will likely be used later for searching for friends
 users.get('/', async (req, res) => {
-    const users = await UserAuth.findAll()
+    const users = await User_Auth.findAll()
     res.json(users)
 });
 

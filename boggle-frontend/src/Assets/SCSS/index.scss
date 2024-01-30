@@ -1,6 +1,6 @@
 
 //Base Page Styling
-
+@forward 'forms';
 @use 'variables' as vars;
 @use 'mixins' as mixins;
 //Universal Styling
@@ -9,60 +9,21 @@
     padding:0px;
     box-sizing: border-box;
 }
-body{
-    background-color: vars.$white;
+#root{
     overflow-x: hidden;
     font-family: vars.$sansFont;
-}
-.App{
-    background-color: vars.$white;
+    background-color: vars.$backgroundColor;
     min-height: 100vh;
+}
+#mainHolder{
+    background-color: vars.$backgroundColor;
+    min-height: 100vh;
+
 }
 .tab{
     display: inline-block;
     margin-left: 20px;
 }
-.button{
-    text-decoration: none;
-    text-transform: uppercase;
-    color: vars.$purple;
-    font-family: vars.$sansFont;
-    font-weight: bold;
-    font-size: 1.5rem;
-    align-items: center;
-    background-color: white;
-    border: 1.5px solid vars.$purple;
-    margin: 20px 10px;
-    padding: 5px 15px;
-    border-radius: 30px;
-    position: relative;
-    &::after{
-        background-color: vars.$purple;
-        border-radius: 30px;
-        content: "";
-        display: block;
-        height: 40px;
-        left: 0;
-        width: 100%;
-        position: absolute;
-        top: -2px;
-        transform: translate(4px, 6px);
-        transition: transform .5s ease-out;
-        z-index: -1;
-    } 
-    &:hover {
-        outline: 0;
-        color: vars.$darkPurple;
-        background-color: vars.$white;
-        &:after{
-            transform: translate(0, 0);
-            background-color: vars.$darkPurple;
-        }
-    }
-}
-main{
-    margin-left: 250px;
-}
 
 
 
@@ -75,7 +36,7 @@ main{
 
 
 
-
+/*
 .form{
     width: 80%;
     @include mixins.roundedboxShadow();
@@ -113,3 +74,4 @@ main{
 
     }
 }
+*/

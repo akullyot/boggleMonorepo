@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
   }
   User_Auth.init({
     userId: {type: DataTypes.SMALLINT,primaryKey: true,autoIncrement: true},
-    userName:{type: DataTypes.STRING, allowNull: false}, //TODO make some rules on acceptable logins
+    username:{type: DataTypes.STRING, allowNull: false}, //TODO make some rules on acceptable logins
     firstName:{type: DataTypes.STRING, allowNull: false},
     lastName: {type: DataTypes.STRING, allowNull: true},
     email: {type: DataTypes.STRING, allowNull: true},
