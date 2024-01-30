@@ -7,6 +7,8 @@ import Home             from './Components/Routes/Home'
 import SignUp           from './Components/Routes/SignUp'
 import Login            from './Components/Routes/Login'
 import CreateRoom       from './Components/Routes/CreateRoom'
+import LeaderBoards     from './Components/Routes/Leaderboards'
+import BrowseUsers      from './Components/Routes/BrowseUsers'
 
 import Error404   from './Components/Error404'
 //Components
@@ -21,6 +23,9 @@ function App() {
         <div id = 'mainHolder'>
           <Routes>
             <Route exact path="/" element={<Home/>} />
+            {/*Paths pertaining to browsing all users and looking at their results*/}
+            <Route exact path="/leaderboards" element={<LeaderBoards/>} />
+            <Route exact path="/users" element={<BrowseUsers/>} />
             {/* Paths pertaining to logging in and signing up */}
             <Route exact path="/signup" element={<SignUp/>} />
             <Route exact path="/login" element={<Login/>} />

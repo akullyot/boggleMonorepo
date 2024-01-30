@@ -3,8 +3,12 @@
 ## Table Names are always Capitalized_Snake_Case and plural
 ## Model Names are always Capitalized_Snake_Case and singular
 ## Column names are camelCased
+## Any enum datatypes or things of that manner are camelCased
 
 
+##Sequelize Cli commands to run to make your own database
+
+    
+    npx sequelize db:migrate
 
 
-npx sequelize db:migrate

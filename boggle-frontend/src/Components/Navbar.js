@@ -11,6 +11,9 @@ import Nav from 'react-bootstrap/Nav';
 import Button from 'react-bootstrap/Button';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 import Toast from 'react-bootstrap/Toast';
+import Form from 'react-bootstrap/Form';
+import InputGroup from 'react-bootstrap/InputGroup';
+import { HouseLockFill } from 'react-bootstrap-icons'
 
 
 export default function Navigationbar() {
@@ -26,43 +29,60 @@ export default function Navigationbar() {
     const handleSignInRedirect = () => {
         navigate('/login')
     }
+    //ALL BUTTONS
+    // Handling joing multiplayer rooms directly from the nav
+    const handleDirectRoomJoin = (e) => {
+        e.preventDefault();
+        //First lets check if youre logged in or not to see if you can actually do this
+        if (CurrentUser){
+
+        }
+        //Go and check if its a valid, public room, or if youre logged in if youre a friend
+        //
+    } 
+    //ALL TOASTS
     //The two toggleable states for being logged in 
     const [logoutToastShow, setLogoutToastShow] = useState(false);
+    const [toastType, setToastType] = useState('');
+    const [toastMessage, setToastMessage] = useState('')
     const { setCurrentUser, currentUser } = useContext(CurrentUser);
 
+    
     let loginActions = (
-        <Button variant="outline-light" onClick={handleSignInRedirect}>Log In / Sign Up</Button>
+        <Button variant="outline-light" onClick={handleSignInRedirect} className='me-auto'>Log In / Sign Up</Button>
     );
     //redefine if signed in
     if (currentUser) {
         loginActions = (     
-                <Nav>
+                <Nav className="me-5">
                     <Navbar.Brand href={`/profile/${currentUser.userName}`}>
                     <img
                     alt=""
                     src={logo}
                     width="35"
                     height="35"
-                    className="rounded me-2 align-top"
+                    className="rounded me-2 align-md"
                     />{' '}
                     </Navbar.Brand>
-                    <NavDropdown title={`Signed in as:   ${currentUser.firstName} ${currentUser.lastName}`} id="collapsible-nav-dropdown">
-                        <NavDropdown.Item href="#action/3.1">My Social profile</NavDropdown.Item>
-                        <NavDropdown.Item href="#action/3.2">
-                            My games
-                        </NavDropdown.Item>
-                        <NavDropdown.Item href="#action/3.3"> My friends </NavDropdown.Item>
-                        <NavDropdown.Divider />
-                            <Button variant="outline-light" onClick = {handleSignOut}>Sign Out</Button>
-                        </NavDropdown>
-                    
+                    <Nav className="me-auto">
+                        <NavDropdown title={`Signed in as:   ${currentUser.firstName} ${currentUser.lastName}`} id="collapsible-nav-dropdown" style= {{marginTop:'5px'}}>
+                            <NavDropdown.Item href="#action/3.1">My Social profile</NavDropdown.Item>
+                            <NavDropdown.Item href="#action/3.2">
+                                My games
+                            </NavDropdown.Item>
+                            <NavDropdown.Item href="#action/3.3"> My friends </NavDropdown.Item>
+                            <NavDropdown.Divider />
+                                <Button variant="outline-light" onClick = {handleSignOut}>Sign Out</Button>
+                        </NavDropdown>  
+                    </Nav>
                 </Nav>);
     };
+
   return (
     <>
         <Navbar className="bg-body-tertiary" bg="dark" data-bs-theme="dark" collapseOnSelect expand="lg">
             <Container>
-                <Navbar.Brand href="/#">
+                <Navbar.Brand href="/#" className="me-5">
                     <img
                         alt=""
                         src={logo}
@@ -81,35 +101,45 @@ export default function Navigationbar() {
                 <Navbar.Toggle aria-controls="responsive-navbar-nav" />
                 <Navbar.Collapse id="responsive-navbar-nav">
                     <Nav className="me-auto">
-                        <Nav.Link href="#features">Leaderboards</Nav.Link>
-                        <Nav.Link href="#pricing"> Browse Users </Nav.Link>
+                        <Nav.Link href="/leaderboards">Leaderboards</Nav.Link>
+                        <Nav.Link href="/users"> Browse Users </Nav.Link>
+                        
                         <NavDropdown title="Single Player" id="collapsible-nav-dropdown">
-                        <NavDropdown.Item href="#action/3.1">Action</NavDropdown.Item>
+                        <NavDropdown.Item href="#action/3.1">Play a Standard Boggle Game</NavDropdown.Item>
                         <NavDropdown.Item href="#action/3.2">
-                            Another action
+                            Replay a Previous Game
                         </NavDropdown.Item>
-                        <NavDropdown.Item href="#action/3.3">Something</NavDropdown.Item>
                         <NavDropdown.Divider />
                         <NavDropdown.Item href="#action/3.4">
-                            Separated link
+                            Boggle Trainer Mode
                         </NavDropdown.Item>
                         </NavDropdown>
                         <NavDropdown title="Multi Player" id="collapsible-nav-dropdown">
                         <NavDropdown.Item href="/createRoom"> Create a Room </NavDropdown.Item>
-                        <NavDropdown.Item href="#action/3.2">
-                            Another action
-                        </NavDropdown.Item>
-                        <NavDropdown.Item href="#action/3.3">Something</NavDropdown.Item>
-                        <NavDropdown.Divider />
                         <NavDropdown.Item href="#action/3.4">
-                            Separated link
+                            Browse all publically available rooms
                         </NavDropdown.Item>
+                        <NavDropdown.Divider />
+                        <NavDropdown.Item>Join a Room with a Link </NavDropdown.Item>
+                        <Container>
+                                <Form inline onSubmit={handleDirectRoomJoin}>
+                                    <InputGroup>
+                                    <InputGroup.Text id="basic-addon1"><HouseLockFill/></InputGroup.Text>
+                                    <Form.Control
+                                        placeholder="room party code"
+                                        aria-label="room party code"
+                                        aria-describedby="basic-addon1"
+                                    />
+                                    </InputGroup>
+                                </Form>
+                        </Container>
                         </NavDropdown>
                     </Nav>
-                    {loginActions}
                 </Navbar.Collapse>
+                {loginActions}
             </Container>
         </Navbar>
+
         <Toast onClose={() => setLogoutToastShow(false)} show={logoutToastShow} delay={6000} autohide style = {{position:'fixed', right: '40px', top: '7rem', width:'600px', height:'200px', zIndex:'10'}}  data-bs-theme="dark" bg='success'>
             <Toast.Header>
             <img src={logo} style = {{height:'40px'}} className="rounded me-2" alt="" />
@@ -118,6 +148,8 @@ export default function Navigationbar() {
              </Toast.Header>
             <Toast.Body> Logout successful, bye! </Toast.Body>
         </Toast>
+
+
     </>
   );
 };

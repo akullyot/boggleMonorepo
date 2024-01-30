@@ -7,7 +7,7 @@ const jwt               = require('json-web-token');
 const { User_Auth } = db;
 
 
-//Purpose: POST on signup create a new user
+//Purpose: POST on signup to create a new user
 users.post('/', async (req, res) => {
     //Backend Validation => first check the inputs arent something wild, then do a find to the database to see if anything matches and then deny if they arent unique
         //Note for muself: https://regexr.com was used to generate these

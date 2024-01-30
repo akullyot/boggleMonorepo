@@ -8,68 +8,70 @@ const app               = express();
 const defineCurrentUser = require('./middleware/defineCurrentUser.js'); //middleware for jwt tokens
 const { Sequelize }     = require('sequelize');
 const http              = require('http'); //required for sockets
-const {Server}          = require("socket.io")
+const {Server}          = require("socket.io");
+const { all } = require('./controllers/users');
 const server            = http.createServer(app);
+//used for connecting a socketID to a jwt
+const defineCurrentUserSocket = require('./middleware/socketDefineCurrentUser.js'); //middleware for jwt tokens 
 
 
 
 
-// CONFIGURATION / MIDDLEWARE
+
+// CONFIGURATION / MIDDLEWARE /EXPRESS
 app.use(cors());
 app.use(express.static(path.join(__dirname, 'public'))); //note: probably wont need
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(defineCurrentUser);
-//Create a new instance of the server class that is running on the socket and connect it to our express
-//TODO move this out of server.js
+
+//CONFIGURATION/ MIDDLEWARE / SOCKET
+    //TODO move this out of server.js
 const io = new Server(server, {cors : {
     origin: process.env.REACT_SERVER, //which url is calling and making calls to our socketio server, so our react server
-    methods: ["GET", "POST"] 
+    methods: ["GET", "POST"], 
 }});
-
-//Global socket variables
-//Purpose: stores room information: roomid is the main key, the rest are the nest objects vars
-    //Users:     all usernames of users currently present in a room
-    //maxSize:   the creator can specify the size of the room
-    //isPrivate: if the user sets it to private only those that are friends with them can join
-    //               //TODO in the future: seperate this into 2, show on public search screen or anyone with room id can join
-    //               //These games will also not show on the public find rooms section
-    //creatorUsername: the username of creator, used for private db querying
-    //isInProgress: stops others from entering
-const allRooms = {};
-
+//Set up the middleware for jwt handshakes
+io.engine.use(defineCurrentUserSocket);
+//ALL OF OUR POSSIBLE SOCKET EMMITTERS AND RECIEVERS
 io.on("connection", (socket) => {
-    console.log(socket.id, 'socketID');
-    //SOCKET EMITTER AND RECIEVERS
+    console.log(socket.id, 'socketID has connected');
+    //make them their own special room so you can easily dm on errors
+    const userUsername = socket.request.currentUser.username;
+    socket.join(`user:${socket.request.currentUser.username}`);
 
+    //SOCKET EMITTER AND RECIEVERS
     socket.on("joinRoom", async (roomStreamedInfo) => {
         //check if they are the creator
         if (roomStreamedInfo.isCreator){
             try {
-                //check that they didnt do a duplicate name 
-                if (allRooms[roomStreamedInfo.roomId]){
-                    throw 'Room id already exists'
-                }else{
-                    //add to your room object
-                    allRooms[roomStreamedInfo.roomId] = {
-                        users           : [roomStreamedInfo.userName],
-                        maxSize         : roomStreamedInfo.maxSize,
-                        isPrivate       : roomStreamedInfo.isPrivate,
-                        creatorUsername : roomStreamedInfo.userName,
-                        isInProgress    : false
-                    }
-                    //establish this id as having joined the room
-                    await socket.join(roomStreamedInfo.roomId);
-                    socket.room = roomStreamedInfo.roomId
-
-                    //emit over to the room that a person has joined
-                    console.log(`user with ID ${socket.id} made room ${roomStreamedInfo.roomId}`);
-                    socket.to(roomStreamedInfo.roomId).emit("recieveRoomCount", "test")  
-                    
-                }
+                //Generate a random room seed id
+                const roomId = Math.random().toString(20).substr(2, 10);
+                //Join a room. This creates a new one if it doesnt exist
+                await socket.join(roomId); //TODO want a custom throw if this fails
+                //Now add to this room the relevant information you want to keep directly to your socket adaptor
+                    //tbh i dont know if im supposed to be adding custom keys to prebuilt things but its an easy method
+                io.of("/").adapter.rooms.get(roomId).creatorUsername = socket.request.currentUser.username;
+                io.of("/").adapter.rooms.get(roomId).maxSize      = roomStreamedInfo.maxSize;
+                io.of("/").adapter.rooms.get(roomId).isPrivate       = roomStreamedInfo.maxSize;
+                io.of("/").adapter.rooms.get(roomId).isInProgress    = roomStreamedInfo.maxSize;
+                io.of("/").adapter.rooms.get(roomId).users           = roomStreamedInfo.maxSize;
+                //emit a success message that you created the room
+                io.in(roomId).emit("roomCreationSuccess", {
+                    roomId: roomId
+                });
+                //next emit the recieve room count that you use to update room count
+                io.in(roomId).emit("recieveRoomCount", {
+                    roomId : roomId,
+                    roomUsers : io.of("/").adapter.rooms.get(roomId).users,
+                    roomCreator: io.of("/").adapter.rooms.get(roomId).creatorUsername
+                });
+                console.log(`user with ID ${socket.id} and username ${userUsername} made room ${roomId}`);
             } catch (error) {
                 //throwing an error will emit a socket error message eventually in the catch
                 console.error('error in creating a room' + error);
+                //since the room doesnt exist you DM your attempted creator directly
+                io.to(`user:${socket.request.currentUser.username}`).emit("roomCreationFailure", {message: "Something went wrong in creating a room. Try again"});
             }
         }else{
             //NOTE: A non room creator just sends over their username and the room id
@@ -122,9 +124,21 @@ io.on("connection", (socket) => {
     });
     //Purpose: Cleans up disconnecting via the following
     // takes them out of the room, and if the room hits 0 people removes it from the roomCount obj
-    socket.on("disconnect", () => {
+    socket.on("disconnect", async () => {
+        //on disconnect check if they are a part of any rooms
+        /*
+        for (let roomId of Object.keys(allRooms)){
+            if (allRooms[roomId].creatorUsername === socket.req.currentUser ){
+                //kill the room and disconnect everyone
+                const userSockets = await io.of("/chat").in()
+                delete allRooms[roomId];
+
+            }
+        }*/
         console.log("User Disconnected", socket.id) // this id changes every time you refresh
+
     });
+
 })
 
 
