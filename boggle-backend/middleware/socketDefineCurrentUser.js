@@ -25,7 +25,7 @@ async function socketdefineCurrentUser(req,res,next){
         let user = await User_Auth.findOne({ where: {userId: userId}});
         if (user){
         //TODO not sure what i actually want, but for now Ill just give the username
-        const userObj = {username: user.username}
+        const userObj = {username: user.username, id: user.userId}
         req.currentUser = userObj;
         //TODO DO SOMETHING ABOUT GUESTS
         }else{

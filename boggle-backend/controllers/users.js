@@ -71,18 +71,32 @@ users.post('/', async (req, res) => {
         return res.status(406).json({message: error});
     };
 });  
-//Purpose: GET user information for their individual profile
-//todo here: check if its their profile or someone elses, if it is someone elses also check if they are your friend
-// Purpose: POST on editing user information
-
-
-
 
 //Purpose: gets a list of all users, will likely be used later for searching for friends
 users.get('/', async (req, res) => {
     const users = await User_Auth.findAll()
     res.json(users)
 });
+//Purpose: gets an individuals profile
+users.get('/:username', async (req,res) => {
+
+});
+//Purpose: allows users to edit their profile
+users.put('/:username', async (req,res) => {
+
+});
+//Purpose: allows users to send, accept, and delete friend requests
+users.post('/:username/addfriend', async (req,res) => {
+
+});
+users.post('/:username/acceptfriend', async (req,res) => {
+
+});
+users.post('/:username/deletefriend', async (req,res) => {
+
+});
+
+
 
 
 module.exports = users

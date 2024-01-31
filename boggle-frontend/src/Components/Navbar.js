@@ -1,6 +1,6 @@
 //Import in all required hooks, contexts,  and dependencies
 import { useState, useContext } from 'react'
-import { CurrentUser }          from '../Contexts/CurrentUser';
+import { CurrentUser, setCurrentUser }          from '../Contexts/CurrentUser';
 import { useNavigate }          from 'react-router';
 //Import in all required media
 import logo from '../Assets/Images/blocks.png';
@@ -17,8 +17,12 @@ import { HouseLockFill } from 'react-bootstrap-icons'
 
 
 export default function Navigationbar() {
-    // All button actions 
+    //All states and other required vars
     const navigate = useNavigate();
+    let { currentUser } = useContext(CurrentUser);
+    const { setCurrentUser } = useContext(CurrentUser);
+    const [roomIdInput, setRoomIdInput] = useState('')
+    // All button actions 
     const handleSignOut = (e) => {
         //e.preventDefault()
         localStorage.clear();
@@ -33,19 +37,13 @@ export default function Navigationbar() {
     // Handling joing multiplayer rooms directly from the nav
     const handleDirectRoomJoin = (e) => {
         e.preventDefault();
-        //First lets check if youre logged in or not to see if you can actually do this
-        if (CurrentUser){
+        navigate('/joinroom/' + roomIdInput);
+    };
 
-        }
-        //Go and check if its a valid, public room, or if youre logged in if youre a friend
-        //
-    } 
     //ALL TOASTS
     //The two toggleable states for being logged in 
     const [logoutToastShow, setLogoutToastShow] = useState(false);
     const [toastType, setToastType] = useState('');
-    const [toastMessage, setToastMessage] = useState('')
-    const { setCurrentUser, currentUser } = useContext(CurrentUser);
 
     
     let loginActions = (
@@ -124,12 +122,16 @@ export default function Navigationbar() {
                         <Container>
                                 <Form inline onSubmit={handleDirectRoomJoin}>
                                     <InputGroup>
-                                    <InputGroup.Text id="basic-addon1"><HouseLockFill/></InputGroup.Text>
+                                    <InputGroup.Text id="roomId"><HouseLockFill/></InputGroup.Text>
                                     <Form.Control
                                         placeholder="room party code"
                                         aria-label="room party code"
                                         aria-describedby="basic-addon1"
-                                    />
+                                        value = {roomIdInput}
+                                        onChange = {e => setRoomIdInput(e.target.value)}
+                                        pattern='^[a-zA-Z0-9]{10}$'
+                                        required
+                                    /> 
                                     </InputGroup>
                                 </Form>
                         </Container>

@@ -20,16 +20,16 @@ export default function CreateRoom() {
       isPrivate : false,
       isCreator: true
     });
-    //a use effect to place your username in the createRoom inputs once context is mounted
-    useEffect(() => {
-      if (currentUser){
-        setCreateRoomInputs({ ...createRoomInputs, username: currentUser.username })
-      }
-    }, [currentUser]); 
     //only added if you successfully connect and create a room
-    let [room, setRoom] = useState(null);
-    let [roomParticipants, setRoomParticipants] = useState(null);
+    let [roomId, setRoomId] = useState(null);
     let [formIsSubmitted, setFormIsSubmitted] = useState(false);
+    let [roomInformation, setRoomInformation] = useState({
+      roomCreator: 'You are the room creator',
+      roomParticipants : [], //array of objs of the structure: username: username, userId: userid 
+      isPrivate: 'Anyone logged in may join your room',
+      roomSize: '' // 'There are x/y people present'
+    });
+    let [isRoomFull, setIsRoomFull] = useState(false);
     //toast notifications state variables
     let [showToast, setShowToast] = useState(false);
     let [toastType, setToastType] = useState('');
@@ -43,17 +43,31 @@ export default function CreateRoom() {
     useEffect(() => {
       //this emits out any time someone joins
       socket.on('recieveRoomCount', (roomInfo) => {
-        setRoomParticipants(roomInfo.roomUsers);
+        setRoomInformation({ ...roomInformation, roomParticipants: roomInfo.roomUsers})
         // Watch for if its over the max value and change the button inputs
+        setRoomInformation({...roomInformation, roomSize: `There are ${roomInfo.roomUsers.length}/ ${createRoomInputs.maxSize} present`});
+        if (roomInfo.roomUsers.length >= createRoomInputs.maxSize){
+          setIsRoomFull(true)
+        } else{
+          setIsRoomFull(false)
+        };
+
       });
       //this emits on your initial room creation
       socket.on('roomCreationSuccess', (roomData) => {
-        setRoom(roomData.roomId);
+        setRoomId(roomData.roomId);
         //Show success toast notif
         setShowToast(true);
         setToastMessage(`You have successfully created room: ${roomData.roomId}`);
         setToastType('success');
         setFormIsSubmitted(true);
+        //change the privacy display text
+        if (createRoomInputs.isPrivate){
+          setRoomInformation({ ...setRoomInformation, isPrivate: 'Only those you are friends with can join this room'})
+        }
+      });
+      socket.on('roomCreationFailure', (errorData) => {
+        console.log(errorData.message)
       })
       return () => {
         /*socket.off('recieveRoomCount', () => {
@@ -70,8 +84,8 @@ export default function CreateRoom() {
            if (!currentUser){
               throw 'you must be logged in first before creating a room'
            }
-            socket.connect();
-            socket.emit("joinRoom", createRoomInputs);
+            await socket.connect();
+            await socket.emit("joinRoom", createRoomInputs);
         } catch (error) {
             //throw a toast that something went wrong 
             console.log(error)
@@ -131,16 +145,22 @@ export default function CreateRoom() {
       )
     };
     //add in all your room components
-    const displayRoomInteraction = (
-      <section id = 'roomWaitingLobby'>
-        <section id = "room information">
-          <h1> You are currently within room {room} </h1>
-          <h2> Number of People Waiting:  </h2>
-        </section>
+    const multiplayerRoomHeader = (
+      <section id = 'multiplayerRoomHeader' data-bs-theme="dark" className="bg-dark bg-gradient text-white form">
+            <h2> Room Id: {roomId}</h2>
+            <h2> Room Size: {roomInformation.roomSize}  </h2>
+            <h3> Room Creator: {roomInformation.roomCreator}</h3>
+            <div>
+                <p> Link to join: {`http://${window.location.host}/joinroom/${roomId}`}</p>
+                <p> {roomInformation.isPrivate}</p>
+            </div>
       </section>
     )
     //Once we have a room id we open up a chatting option with whomever else is present and waiting
-    const displayChat = room && <Chat socket={socket} room={room} />
+    const displayChat = formIsSubmitted && <Chat socket={socket} room={roomId} />
+    const displayParticipants = formIsSubmitted && ''
+    const displayGame = formIsSubmitted && ''
+    const displayButtons = formIsSubmitted && ''
 
     return (
       <main>
@@ -153,9 +173,15 @@ export default function CreateRoom() {
             <Toast.Body> {toastMessage} </Toast.Body>
         </Toast>
         {formIsSubmitted ?  <></> : displayRoomForm}
-        {formIsSubmitted ? displayRoomInteraction : <></>}
-
-        {displayChat}
+        {formIsSubmitted ? multiplayerRoomHeader : <></>}
+        <section id='gameSpace'>
+          {displayParticipants}
+          {displayGame}
+          {displayChat}
+        </section>
+        <section id='gameButtons'>
+            {displayButtons}
+        </section>
       </main>
     );
   };

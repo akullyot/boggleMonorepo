@@ -17,6 +17,11 @@
   text-transform: uppercase;
 }
 
+#multiplayerRoomHeader {
+  margin-top: 5px;
+  width: 40%;
+}
+
 * {
   margin: 0px;
   padding: 0px;

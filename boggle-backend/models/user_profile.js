@@ -9,8 +9,13 @@ module.exports = (sequelize, DataTypes) => {
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
-    static associate(models) {
-      // define association here
+    static associate({ User_Auth }) {
+      // each profile has one user id associated with it
+      User_Profile.belongsTo( User_Auth, {
+        foreignKey:'userId',
+        as:"user"
+      })
+
     }
   }
   User_Profile.init({

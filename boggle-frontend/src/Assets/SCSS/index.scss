@@ -1,6 +1,8 @@
 
 //Base Page Styling
 @forward 'forms';
+@forward 'multiplayerLobby';
+
 @use 'variables' as vars;
 @use 'mixins' as mixins;
 //Universal Styling
