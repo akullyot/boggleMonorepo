@@ -1,14 +1,14 @@
 import { useEffect, useState, useContext}    from "react"
 import { CurrentUser }            from "../../Contexts/CurrentUser"
 
-export default function Chat( {socket, room}){
+export default function Chat( {socket, roomId}){
     const { currentUser } = useContext(CurrentUser);
     const [currentMessage, setCurrentMessage] = useState("");
     const [allMessages, setallMessages] = useState([]);
     const handleSendMessage = async () => {
         if (currentMessage !== ""){
             const messageData = {
-                roomId: room,
+                roomId: roomId,
                 message: currentMessage,
                 time: `${new Date().getHours()}:${new Date().getMinutes()}`
             };
@@ -36,11 +36,12 @@ export default function Chat( {socket, room}){
     }, [socket]);
 
     return(
-        <div id="chatHolder">
-            <div className="chatHeader">
-                <p> Chat Room </p>
+        <div id="chatHolder" className="bg-dark bg-gradient text-white ">
+            <div className="header">
+                <h2> Chat Room </h2>
+                <h5> Waiting Lobby </h5>
             </div>
-            <div className="chatBody">
+            <div className="body">
                 { allMessages.map((messageInfo) => {
                     if (messageInfo.sender == currentUser.username){
                         return(

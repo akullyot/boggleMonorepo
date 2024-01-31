@@ -3,7 +3,66 @@
 
 #multiplayerRoomHeader{
     margin-top: 5px;
-    width: 30%;
-    
+    width: max-content;
+    padding: 10px 30px;
+    margin-bottom: 0px;
+    #roomTitle{
+        color: lightgreen;
+        margin-bottom: 10px;
+    }
+    h4{
+        margin-bottom: 10px;
+    }
+    #linkHolder{
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+        align-items: center;
+        #roomLink{
+            padding: 10px;
+            border: 2px solid lightgreen;
+            border-radius: 20px;
+            margin-right: 20px;
+            span{
+                color: lightgreen;
+                font-size: larger;
+            }
+        #privateInfo{
+            font-size: smaller;
+        }
+        }
+    }
+}
+
+#gameSpace{
+    margin-top: 0px;
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    align-items: top;
+    justify-content: space-between;
+    #participantsHolder, #chatHolder{
+        width: 20vw;
+        padding: 0px;
+        margin: 0px 50px;
+        align-items: center;
+        border-radius: 20px;
+    }
+    .header{
+        color:lightgreen;
+        text-align: center;
+        border-top-left-radius: 20px;
+        border-top-right-radius: 20px;
+        background-color: rgb(37, 37, 37);
+        margin: 0px;
+        width: 100%;
+        padding-top: 10px;
+        font-weight: bolder;
+        border: 5px solid rgb(0, 0, 0);
+
+    }
+    .body{
+        height: 60vh;
+    }
 
 }

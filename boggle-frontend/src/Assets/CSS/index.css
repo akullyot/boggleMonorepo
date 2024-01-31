@@ -19,7 +19,66 @@
 
 #multiplayerRoomHeader {
   margin-top: 5px;
-  width: 40%;
+  width: max-content;
+  padding: 10px 30px;
+  margin-bottom: 0px;
+}
+#multiplayerRoomHeader #roomTitle {
+  color: lightgreen;
+  margin-bottom: 10px;
+}
+#multiplayerRoomHeader h4 {
+  margin-bottom: 10px;
+}
+#multiplayerRoomHeader #linkHolder {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+}
+#multiplayerRoomHeader #linkHolder #roomLink {
+  padding: 10px;
+  border: 2px solid lightgreen;
+  border-radius: 20px;
+  margin-right: 20px;
+}
+#multiplayerRoomHeader #linkHolder #roomLink span {
+  color: lightgreen;
+  font-size: larger;
+}
+#multiplayerRoomHeader #linkHolder #roomLink #privateInfo {
+  font-size: smaller;
+}
+
+#gameSpace {
+  margin-top: 0px;
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  align-items: top;
+  justify-content: space-between;
+}
+#gameSpace #participantsHolder, #gameSpace #chatHolder {
+  width: 20vw;
+  padding: 0px;
+  margin: 0px 50px;
+  align-items: center;
+  border-radius: 20px;
+}
+#gameSpace .header {
+  color: lightgreen;
+  text-align: center;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  background-color: rgb(37, 37, 37);
+  margin: 0px;
+  width: 100%;
+  padding-top: 10px;
+  font-weight: bolder;
+  border: 5px solid rgb(0, 0, 0);
+}
+#gameSpace .body {
+  height: 60vh;
 }
 
 * {
@@ -31,12 +90,12 @@
 #root {
   overflow-x: hidden;
   font-family: Poppins, sans-serif;
-  background-color: rgb(120, 121, 126);
+  background-color: rgba(75, 76, 82, 0.699);
   min-height: 100vh;
 }
 
 #mainHolder {
-  background-color: rgb(120, 121, 126);
+  background-color: rgba(75, 76, 82, 0.699);
   min-height: 100vh;
 }
 

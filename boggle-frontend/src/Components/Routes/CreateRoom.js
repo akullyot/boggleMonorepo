@@ -29,6 +29,7 @@ export default function CreateRoom() {
       isPrivate: 'Anyone logged in may join your room',
       roomSize: '' // 'There are x/y people present'
     });
+    let [a, seta] = useState([])
     let [isRoomFull, setIsRoomFull] = useState(false);
     //toast notifications state variables
     let [showToast, setShowToast] = useState(false);
@@ -43,7 +44,16 @@ export default function CreateRoom() {
     useEffect(() => {
       //this emits out any time someone joins
       socket.on('recieveRoomCount', (roomInfo) => {
-        setRoomInformation({ ...roomInformation, roomParticipants: roomInfo.roomUsers})
+        //you cant stream over arrays it seems, so we are going to make our own 
+        let roomUsersArray = [];
+        Object.keys(roomInfo.roomUsers).forEach((usernameVal,indexVal) => {
+          roomUsersArray.push({username: usernameVal, userId: indexVal})
+        });
+        console.log(typeof roomUsersArray)
+        setRoomInformation({ ...roomInformation, roomParticipants: roomUsersArray})
+        setArray(['test'])
+        console.log(roomInformation.roomParticipants)
+        console.log(a)
         // Watch for if its over the max value and change the button inputs
         setRoomInformation({...roomInformation, roomSize: `There are ${roomInfo.roomUsers.length}/ ${createRoomInputs.maxSize} present`});
         if (roomInfo.roomUsers.length >= createRoomInputs.maxSize){
@@ -51,7 +61,7 @@ export default function CreateRoom() {
         } else{
           setIsRoomFull(false)
         };
-
+        console.log(roomInformation.roomParticipants);
       });
       //this emits on your initial room creation
       socket.on('roomCreationSuccess', (roomData) => {
@@ -84,8 +94,8 @@ export default function CreateRoom() {
            if (!currentUser){
               throw 'you must be logged in first before creating a room'
            }
-            await socket.connect();
-            await socket.emit("joinRoom", createRoomInputs);
+             socket.connect();
+             socket.emit("joinRoom", createRoomInputs);
         } catch (error) {
             //throw a toast that something went wrong 
             console.log(error)
@@ -147,35 +157,53 @@ export default function CreateRoom() {
     //add in all your room components
     const multiplayerRoomHeader = (
       <section id = 'multiplayerRoomHeader' data-bs-theme="dark" className="bg-dark bg-gradient text-white form">
-            <h2> Room Id: {roomId}</h2>
-            <h2> Room Size: {roomInformation.roomSize}  </h2>
-            <h3> Room Creator: {roomInformation.roomCreator}</h3>
-            <div>
-                <p> Link to join: {`http://${window.location.host}/joinroom/${roomId}`}</p>
-                <p> {roomInformation.isPrivate}</p>
+            <h2 id='roomTitle'> Room Id: {roomId}</h2>
+            <h4> {roomInformation.roomCreator}</h4>
+            <div id="linkHolder">
+                <p id='roomLink'> Link to join: <span> {`http://${window.location.host}/joinroom/${roomId}`} </span></p>
+                <p id= 'privateInfo'> {roomInformation.isPrivate}</p>
             </div>
       </section>
+    );
+    const displayParticipants = (
+      <div id='participantsHolder' className="bg-dark bg-gradient text-white">
+        <div id='participantHeader' className='header'>
+          <h2> All Participants </h2>
+          <h5>{roomInformation.roomSize}</h5>
+        </div>
+        <div className='body'>
+          {Object.keys(roomInformation.roomParticipants).map((userId) => {
+                return(
+                  <div>
+                      <p> test </p>
+                      <p> {roomInformation.roomParticipants[userId]} </p>
+                  </div>
+
+                )
+            })}
+        </div>
+
+      </div>
     )
     //Once we have a room id we open up a chatting option with whomever else is present and waiting
     const displayChat = formIsSubmitted && <Chat socket={socket} room={roomId} />
-    const displayParticipants = formIsSubmitted && ''
     const displayGame = formIsSubmitted && ''
     const displayButtons = formIsSubmitted && ''
 
     return (
       <main>
-        <Toast onClose={() => setShowToast(false)} show={showToast} delay={6000} autohide style = {{position:'fixed', right: '40px', top: '10', width:'600px', height:'200px', zIndex:'10'}} bg={toastType}>
+        <Toast onClose={() => setShowToast(false)} show={showToast} delay={6000} autohide style = {{position:'fixed', right: '40px', top: '10', width:'600px', height:'200px', zIndex:'10'}} bg={toastType} data-bs-theme="dark">
           <Toast.Header>
             <img src={logo} style = {{height:'40px'}} className="rounded me-2" alt="" />
             <strong className="me-auto">Boggle</strong>
             <small>Now</small>
           </Toast.Header>
-            <Toast.Body> {toastMessage} </Toast.Body>
+            <Toast.Body > {toastMessage} </Toast.Body>
         </Toast>
         {formIsSubmitted ?  <></> : displayRoomForm}
         {formIsSubmitted ? multiplayerRoomHeader : <></>}
         <section id='gameSpace'>
-          {displayParticipants}
+          {formIsSubmitted ? displayParticipants : <></>}
           {displayGame}
           {displayChat}
         </section>

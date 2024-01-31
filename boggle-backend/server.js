@@ -63,16 +63,18 @@ io.on("connection", (socket) => {
                 io.of("/").adapter.rooms.get(roomId).maxSize         = roomStreamedInfo.maxSize;
                 io.of("/").adapter.rooms.get(roomId).isPrivate       = roomStreamedInfo.isPrivate;
                 io.of("/").adapter.rooms.get(roomId).isInProgress    = false;
-                io.of("/").adapter.rooms.get(roomId).users           = [{ username: userUsername, userId: userId}];
-
+                io.of("/").adapter.rooms.get(roomId).users           = [{ username: userUsername, userId: userId }]; //note: you cant stream over arrays on emit, so you convert this to an object
                 //emit a success message that you created the room
                 io.in(roomId).emit("roomCreationSuccess", {
                     roomId: roomId
                 });
-                //next emit the recieve room count that you use to update room count
+                
+                let emittedCountObj = {};
+                emittedCountObj[userId] = userUsername
+                console.log(emittedCountObj)
                 io.in(roomId).emit("recieveRoomCount", {
                     roomId         : roomId,
-                    roomUsers      : io.of("/").adapter.rooms.get(roomId).users,
+                    roomUsers      : emittedCountObj,
                     roomCreatorId  : io.of("/").adapter.rooms.get(roomId).creatorId
                 });
                 console.log(`user with ID ${socket.id} and username ${userUsername} made room ${roomId}`);
@@ -118,7 +120,7 @@ io.on("connection", (socket) => {
                 io.to(`user:${userId}`).emit("roomJoinSuccess", {message: `you have joined room ${roomId}`});
                 io.in(roomId).emit("recieveRoomCount", {
                     roomId         : roomId,
-                    roomUserIds    : io.of("/").adapter.rooms.get(roomId).users,
+                    roomUsers      : io.of("/").adapter.rooms.get(roomId).users,
                     roomCreatorId  : io.of("/").adapter.rooms.get(roomId).creatorId
                 });
             } catch (error) {
