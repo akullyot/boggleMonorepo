@@ -51,11 +51,11 @@ export default function CreateRoom() {
         });
         console.log(typeof roomUsersArray)
         setRoomInformation({ ...roomInformation, roomParticipants: roomUsersArray})
-        setArray(['test'])
+        seta(['test'])
         console.log(roomInformation.roomParticipants)
         console.log(a)
         // Watch for if its over the max value and change the button inputs
-        setRoomInformation({...roomInformation, roomSize: `There are ${roomInfo.roomUsers.length}/ ${createRoomInputs.maxSize} present`});
+        setRoomInformation({...roomInformation, roomSize: `There are ${roomUsersArray.length}/ ${createRoomInputs.maxSize} present`});
         if (roomInfo.roomUsers.length >= createRoomInputs.maxSize){
           setIsRoomFull(true)
         } else{
@@ -73,7 +73,7 @@ export default function CreateRoom() {
         setFormIsSubmitted(true);
         //change the privacy display text
         if (createRoomInputs.isPrivate){
-          setRoomInformation({ ...setRoomInformation, isPrivate: 'Only those you are friends with can join this room'})
+          setRoomInformation({ ...setRoomInformation, isPrivate: 'Only those with whom you are friends can join this room'})
         }
       });
       socket.on('roomCreationFailure', (errorData) => {
@@ -185,10 +185,15 @@ export default function CreateRoom() {
 
       </div>
     )
+    const displayButtons = (
+      <div id="buttonsHolder">
+          <Button>Start Game</Button>
+          <Button>Abandon Game</Button>
+      </div>
+    )
     //Once we have a room id we open up a chatting option with whomever else is present and waiting
     const displayChat = formIsSubmitted && <Chat socket={socket} room={roomId} />
-    const displayGame = formIsSubmitted && ''
-    const displayButtons = formIsSubmitted && ''
+    const displayGame = formIsSubmitted && '';
 
     return (
       <main>
@@ -208,7 +213,7 @@ export default function CreateRoom() {
           {displayChat}
         </section>
         <section id='gameButtons'>
-            {displayButtons}
+            {formIsSubmitted ? displayButtons : <></>}
         </section>
       </main>
     );
