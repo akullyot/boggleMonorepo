@@ -1,5 +1,6 @@
-import { useEffect, useState, useContext}    from "react"
-import { CurrentUser }            from "../../Contexts/CurrentUser"
+import { useEffect, useState, useContext}    from "react";
+import { CurrentUser }            from "../../Contexts/CurrentUser";
+
 
 export default function Chat( {socket, roomId}){
     const { currentUser } = useContext(CurrentUser);
@@ -10,18 +11,16 @@ export default function Chat( {socket, roomId}){
             const messageData = {
                 roomId: roomId,
                 message: currentMessage,
-                time: `${new Date().getHours()}:${new Date().getMinutes()}`
+                time: `${new Date().getHours()}:${new Date().getMinutes()}`,
             };
+            setCurrentMessage("");
             try {
+                //TODO check message isnt an insane size
                 await socket.emit("sendMessage", messageData);
-                setallMessages((array) => [...array, {
-                    sender: currentUser.username,
-                    message: messageData.message,
-                    time: messageData.time
-                }]);
-
+               
             } catch (error) {
                 //TODO do something on a fail 
+                console.log(error)
             }
         }
     };
@@ -30,9 +29,8 @@ export default function Chat( {socket, roomId}){
             setallMessages((array) => [...array, recievedMessage])
         });
         return () => {
-            //TODO handle taking sockets off
+           socket.off("recieveMessage");
         }
-
     }, [socket]);
 
     return(
@@ -42,26 +40,26 @@ export default function Chat( {socket, roomId}){
                 <h5> Waiting Lobby </h5>
             </div>
             <div className="body">
-                { allMessages.map((messageInfo) => {
+                { allMessages.map((messageInfo, index) => {
                     if (messageInfo.sender == currentUser.username){
                         return(
-                        <div className="sentMessage">
-                            <p>{messageInfo.sender} at {messageInfo.time}</p>
-                            <p>{messageInfo.message}</p>
+                        <div className="sentMessage" key={index}>
+                            <p className="messageHeader">{messageInfo.sender} at {messageInfo.time}</p>
+                            <p className="messageContent">{messageInfo.message}</p>
                         </div> 
                         )  
                     }else{
                         return(
-                        <div className="recievedMessage">
-                            <p>{messageInfo.sender} at {messageInfo.time}</p>
-                            <p>{messageInfo.message}</p>
+                        <div className="recievedMessage" key={index}>
+                            <p className="messageHeader">{messageInfo.sender} at {messageInfo.time}</p>
+                            <p className="messageContent">{messageInfo.message}</p>
                         </div>
                         )
                     }
                 })}
             </div>
             <div className="chatFooter">
-                <input type="text" placeholder="Message...." onChange={(e)=>setCurrentMessage(e.target.value)}></input>
+                <input type="text" placeholder="Message...." value = {currentMessage} onChange={(e)=>setCurrentMessage(e.target.value)}></input>
                 <button onClick={handleSendMessage}> &#9658; </button>
             </div>
         </div>

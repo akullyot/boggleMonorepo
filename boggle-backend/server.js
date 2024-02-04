@@ -1,43 +1,35 @@
 // DEPENDENCIES and GLOBAL MODULES
 require('dotenv').config();
-const express           = require('express');
-const bodyParser        = require('body-parser');
-const cors              = require('cors');
-const path              = require('path');
-const app               = express();
-const defineCurrentUser = require('./middleware/defineCurrentUser.js'); //middleware for jwt tokens
-const { Sequelize }     = require('sequelize');
-const http              = require('http'); //required for sockets
-const {Server}          = require("socket.io");
-const server            = http.createServer(app);
-//used for connecting a socketID to a jwt
-const defineCurrentUserSocket = require('./middleware/socketDefineCurrentUser.js'); //middleware for jwt tokens 
-
-
+const express                 = require('express');
+const bodyParser              = require('body-parser');
+const cors                    = require('cors');
+const path                    = require('path');
+const app                     = express();
+const defineCurrentUser       = require('./middleware/defineCurrentUser.js');
+const defineCurrentUserSocket = require('./middleware/socketDefineCurrentUser.js'); 
+const db                      = require("./models");
+const { User_Friendship }     = db;
+const http                    = require('http'); //required for sockets
+const {Server}                = require("socket.io");
+const server                  = http.createServer(app);
+//const socketLobby             = require('./socketConnections/lobbyFunctions.js');
+//const socketGame              = require('./socketConnections/gameFunctions.js');
 
 
 
 // CONFIGURATION / MIDDLEWARE /EXPRESS
 app.use(cors());
-app.use(express.static(path.join(__dirname, 'public'))); //note: probably wont need
+//app.use(express.static(path.join(__dirname, 'public'))); //note: probably wont need
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(defineCurrentUser);
-
-//CONFIGURATION/ MIDDLEWARE / SOCKET
-
-
-
-    //TODO move this out of server.js
-const io = new Server(server, {cors : {
-    origin: process.env.REACT_SERVER, //which url is calling and making calls to our socketio server, so our react server
-    methods: ["GET", "POST"], 
-}});
-//Set up the middleware for jwt handshakes
+const io = new Server(server, {cors : {origin: process.env.REACT_SERVER, methods: ["GET", "POST"], }});
 io.engine.use(defineCurrentUserSocket);
+
+
+
 //ALL OF OUR POSSIBLE SOCKET EMMITTERS AND RECIEVERS
-const db = require("./models")
-const { User_Friendship } = db;
+
 
 io.on("connection", (socket) => {
     console.log(socket.id, 'socketID has connected');
@@ -47,7 +39,11 @@ io.on("connection", (socket) => {
     socket.join(`user:${socket.request.currentUser.id}`);
     //holds all rooms youre in for easier handling of disconnecting cleanup
     const userRooms = [];
+
+
     //SOCKET EMITTER AND RECIEVERS
+
+
     socket.on("joinRoom", async (roomStreamedInfo) => {
         //check if they are the creator
         if (roomStreamedInfo.isCreator){
@@ -64,17 +60,18 @@ io.on("connection", (socket) => {
                 io.of("/").adapter.rooms.get(roomId).isPrivate       = roomStreamedInfo.isPrivate;
                 io.of("/").adapter.rooms.get(roomId).isInProgress    = false;
                 io.of("/").adapter.rooms.get(roomId).users           = [{ username: userUsername, userId: userId }]; //note: you cant stream over arrays on emit, so you convert this to an object
+                //GAME DETAILS
+                io.of("/").adapter.rooms.get(roomId).seed             = roomStreamedInfo.seed; 
+                io.of("/").adapter.rooms.get(roomId).minutesDuration  = roomStreamedInfo.minutesDuration;
+                //is autocheck
+                //dictionary used 
                 //emit a success message that you created the room
                 io.in(roomId).emit("roomCreationSuccess", {
                     roomId: roomId
                 });
-                
-                let emittedCountObj = {};
-                emittedCountObj[userId] = userUsername
-                console.log(emittedCountObj)
                 io.in(roomId).emit("recieveRoomCount", {
                     roomId         : roomId,
-                    roomUsers      : emittedCountObj,
+                    roomUsers      : io.of("/").adapter.rooms.get(roomId).users,
                     roomCreatorId  : io.of("/").adapter.rooms.get(roomId).creatorId
                 });
                 console.log(`user with ID ${socket.id} and username ${userUsername} made room ${roomId}`);
@@ -117,10 +114,29 @@ io.on("connection", (socket) => {
                 await socket.join(roomId);
                 //add yourself to the users list
                 io.of("/").adapter.rooms.get(roomId).users.push({username: userUsername, userId:userId});
-                io.to(`user:${userId}`).emit("roomJoinSuccess", {message: `you have joined room ${roomId}`});
+                //to make it eaier on the front end, get the creator username by looping through and finding it from the .users
+                let creatorUsername = '';
+                io.of("/").adapter.rooms.get(roomId).users.forEach((userObj) => {
+                    if (userObj.userId == io.of("/").adapter.rooms.get(roomId).creatorId){
+                        creatorUsername = userObj.username
+                    } 
+                })
+                io.to(`user:${userId}`).emit("roomJoinSuccess", {
+                    message     : `you have joined room ${roomId}`,
+                    roomCreator : creatorUsername,
+                    maxSize     : io.of("/").adapter.rooms.get(roomId).maxSize,
+                    isPrivate   : io.of("/").adapter.rooms.get(roomId).isPrivate,
+                    seed        : io.of("/").adapter.rooms.get(roomId).seed  
+                });
+
+                let emittedCountObj = {};
+                io.of("/").adapter.rooms.get(roomId).users.map((Obj)=>{
+                    emittedCountObj[Obj.userId] = Obj.username;
+                });
+
                 io.in(roomId).emit("recieveRoomCount", {
                     roomId         : roomId,
-                    roomUsers      : io.of("/").adapter.rooms.get(roomId).users,
+                    roomUsers      : emittedCountObj,
                     roomCreatorId  : io.of("/").adapter.rooms.get(roomId).creatorId
                 });
             } catch (error) {
@@ -130,18 +146,27 @@ io.on("connection", (socket) => {
         };
     });
 
-    socket.on("sendMessage", (messageData) => {
-        console.log(messageData);
+
+    socket.on("sendMessage", (messageInfo) => {
         //Now send to the frontend to anyone in the same room
-        socket.to(messageData.roomId).emit("recieveMessage", {
+        io.in(messageInfo.roomId).emit("recieveMessage", {
             sender: userUsername,
-            message: messageData.message,
-            time: messageData.time
+            message: messageInfo.message,
+            time: messageInfo.time,
         });
         console.log('message sent')
     });
-    //Purpose: Cleans up disconnecting via the following
-    // takes them out of the room, and if the room hits 0 people removes it from the roomCount obj
+
+    socket.on('kickUser', (roomandUserInfo) => {
+        
+    });
+
+    socket.on('toggleStartGame', (roomStreamedInfo) => {
+        //set the game to in progress so nobody else can join
+        io.of("/").adapter.rooms.get(roomStreamedInfo.roomId).isInProgress  = true;
+        io.in(roomStreamedInfo.roomId).emit('startGame')
+    });
+
     socket.on("disconnect", async () => {
         //this should just be a full socket is lost  disconnect, not just a room disconnect
         //on disconnect check if they are a part of any rooms
@@ -161,26 +186,33 @@ io.on("connection", (socket) => {
                         }
                     });
                     //TODO emit out that someone left to everyone in the room
+                    let emittedCountObj = {};
+                    io.of("/").adapter.rooms.get(roomId).users.map((Obj)=>{
+                        emittedCountObj[Obj.userId] = Obj.username;
+                    });
+
+                    io.in(roomId).emit("recieveRoomCount", {
+                        roomId         : roomId,
+                        roomUsers      : emittedCountObj,
+                        roomCreatorId  : io.of("/").adapter.rooms.get(roomId).creatorId
+                    });
+                    
                 }
             };
-            //Note: you dont need to clean up anything else here because your entire socket is being killed here,
-            //just need to clean up io's others may be in to recognize you left
         });
-        console.log("User Disconnected", socket.id) // this id changes every time you refresh
+        console.log("User Disconnected", socket.id, userUsername) // this id changes every time you refresh
+        
     });
-
-})
+});
 
 
 //ROUTES
     //CONTROLLER ROUTES
 app.use('/users',          require('./controllers/users'));
 app.use('/authentication', require('./controllers/authentication'));
+app.use('/games',          require('./controllers/games'));
     //CATCHALL ROUTE
-app.get('*', (req,res) => {
-    res.set('Access-Control-Allow-Origin', 'http://localhost:3000');
-    response.status(404).json({message: 'Request not found'});
-});
+app.get('*', (req,res) => {response.status(404).json({message: 'Request not found'})});
 
 //LISTEN
 server.listen(process.env.PORT, () => {

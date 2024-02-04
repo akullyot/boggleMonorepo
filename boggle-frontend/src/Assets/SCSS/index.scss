@@ -2,6 +2,7 @@
 //Base Page Styling
 @forward 'forms';
 @forward 'multiplayerLobby';
+@forward 'multiplayerGame';
 
 @use 'variables' as vars;
 @use 'mixins' as mixins;
@@ -20,7 +21,6 @@
 #mainHolder{
     background-color: vars.$backgroundColor;
     min-height: 100vh;
-
 }
 .tab{
     display: inline-block;
@@ -32,48 +32,3 @@
 
 
 
-
-
-
-
-
-
-/*
-.form{
-    width: 80%;
-    @include mixins.roundedboxShadow();
-    margin: auto;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    font-family: vars.$sansFont;
-    margin-top: 60px;
-    h1{
-        text-transform: uppercase;
-        padding: 40px;
-        color: vars.$darkPurple;
-    }
-    .formGroup{
-        width: 100%;
-        display: flex;
-        flex-direction: row;
-        padding: 30px;
-        justify-content: center;
-        label{
-            text-transform: uppercase;
-            width: 250px !important;
-            margin-right: 20px;
-            color: vars.$darkPurple;
-            font-size: larger;
-        }
-        input{
-            width: 600px;
-        }
-        .invalid-feedback{
-            margin-left: 20px;
-        }
-
-    }
-}
-*/

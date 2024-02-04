@@ -1,6 +1,5 @@
 //defining all of our emitter and sender functions here for now
-
-
+io = require('../server');
 
 
 //Purpose: creates a room or adds a user to a lobby
@@ -115,7 +114,7 @@ const sendMessage = () => {
 
 
 //Purpose: Handles Removing a user from the lobby if the creator decides to kick them
-const kickUser = (roomAndUserInfo) = () => {
+const kickUser = () => {
 
 };
 

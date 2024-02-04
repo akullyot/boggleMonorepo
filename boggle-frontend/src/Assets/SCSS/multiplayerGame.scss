@@ -1,0 +1,110 @@
+@use 'variables' as vars;
+@use 'mixins' as mixins;
+
+
+#startAnimation
+{
+    width: 95%;
+    border: 5px solid rgb(0, 0, 0);
+    display: flex;
+    flex-direction: column;
+    border-radius: 20px;
+    justify-content: center;
+    align-items: center;
+    height: 90vh;
+    margin: auto;
+    margin-top: 20px;
+    h2{
+        padding: 20px;
+        color: rgba(0, 0, 0, 0.63);
+    }
+};
+
+
+#boggleGameArea{
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: space-around;
+    align-items: flex-start;
+    margin-top: 20px;
+    #gameFoundWords{
+        width: 20vw;
+        height: 90vh;
+        border-radius: 20px;
+        .header{
+            color:#90ee90;
+            text-align: center;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            background-color: rgb(37, 37, 37);
+            margin: 0px;
+            width: 100%;
+            padding-top: 10px;
+            font-weight: bolder;
+            border: 5px solid rgb(0, 0, 0);
+        }
+    }
+    #gamePlayerArea{
+        width: 75vw;
+        height: 90vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        #timer{
+            height: 6vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: row;
+            color:#90ee90;
+            text-align: center;
+            border-radius: 20px;
+            background-color: rgb(37, 37, 37);
+            padding: 20px 50px;
+            font-weight: bolder;
+            border: 5px solid rgb(0, 0, 0);
+            h4{
+                margin-right: 60px
+            }
+
+        }
+        #boggleBoard{
+            border-radius: 20px;
+            padding: 10px;
+            font-weight: bolder;
+            border: 10px solid rgb(0, 0, 0);
+            margin: 20px auto;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.322);
+            .boggleBoardRow{
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                justify-content: center;
+                .boggleDice{
+                    border: 1px solid #333;
+                    background: #ddd radial-gradient(circle, #fff, #fff 70%, transparent 70%);
+                    border-radius: 12px;
+                    width: 150px;
+                    height: 150px;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    color: #222;
+                    font-size: 55px;
+                    margin: 5px;
+                }
+            }
+
+
+
+        }
+        #inputBox{
+            height: 10vh;
+        }
+    }
+
+}
+
+
