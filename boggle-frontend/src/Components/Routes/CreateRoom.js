@@ -198,7 +198,11 @@ useEffect(() => {
 
     };
     const handleSendFriendRequest = async (userId) => {
-
+          try {
+              console.log(userId)
+          } catch (error) {
+            
+          }
     };
     const handleKickUser = (username) => {
       //send an emit message to kick the user. The result will come back as a kickUserSuccess

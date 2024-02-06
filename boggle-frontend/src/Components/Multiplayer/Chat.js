@@ -37,7 +37,7 @@ export default function Chat( {socket, roomId}){
         <div id="chatHolder" className="bg-dark bg-gradient text-white ">
             <div className="header">
                 <h2> Chat Room </h2>
-                <h5> Waiting Lobby </h5>
+                <h5> Lobby </h5>
             </div>
             <div className="body">
                 { allMessages.map((messageInfo, index) => {

@@ -89,7 +89,6 @@
             h4{
                 margin-right: 60px
             }
-
         }
         #boggleBoard{
             border-radius: 20px;
@@ -162,7 +161,163 @@
             }
         }
     }
-
 }
+
+#resultsContainer{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    #resultsTitle{
+        margin-top: 5px;
+        width: max-content;
+        padding: 10px 30px;
+        margin-bottom: 0px;
+        border: 5px solid rgb(0, 0, 0);
+        color: lightgreen;
+    }
+    #chatAndAllResultsHolder{
+        display: flex;
+        flex-direction: row;
+        margin-top: 30px;
+        #allResultsHolder{
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            width: 70vw;
+            #playerHolder{
+                display: flex;
+                flex-direction: row;
+                margin: 0px 10px;
+                justify-content: start;
+                margin-bottom: 40px;
+                .playerResults{
+                    border-radius: 20px;
+                    color: lightgreen;
+                    width: 15vw;
+                    margin-left: 30px;
+                    .header{
+                        color:#90ee90;
+                        text-align: center;
+                        border-top-left-radius: 10px;
+                        border-top-right-radius: 10px;
+                        background-color: rgb(37, 37, 37);
+                        margin: 0px;
+                        width: 100%;
+                        padding-top: 10px;
+                        font-weight: bolder;
+                        border: 5px solid rgb(0, 0, 0);
+                    }
+                    .playerWordsFound{
+                        ul{
+                            list-style: none;
+                            display: flex;
+                            flex-direction: column;
+                            justify-content: start;
+                            align-items: center;
+                            padding: 10px 50px;
+                            margin-bottom: 0px;
+                            min-height: 800px;
+
+                            li{
+                                color: #90ee90;
+                                font-size: 20px;
+                                margin-top: 5px;
+                            }
+                        }
+                    }
+                }
+
+            }
+            #solvedBoard{
+                margin-top: 20px;
+                width: 100%;
+                border-radius: 20px;
+                color: lightgreen;
+                width: 70vw;
+                .header{
+                    color:#90ee90;
+                    text-align: center;
+                    border-top-left-radius: 10px;
+                    border-top-right-radius: 10px;
+                    background-color: rgb(37, 37, 37);
+                    margin: 0px;
+                    width: 100%;
+                    padding-top: 10px;
+                    font-weight: bolder;
+                    border: 5px solid rgb(0, 0, 0);
+                }
+                ul{
+                    border-radius: 20px;
+                    margin-top: 10px;
+                    list-style: none;
+                    width: 100%;
+                    li{
+                        display: inline-block;
+                        margin-right: 5px;
+                        margin-bottom: 10px;
+                        width: 160px;
+                    }
+                }
+            }
+
+        }
+
+        #chatHolder{
+            width: 22vw;
+            padding: 0px;
+            margin: 0px 50px;
+            align-items: center;
+            border-radius: 20px;
+            .header{
+                color:#90ee90;
+                text-align: center;
+                border-top-left-radius: 20px;
+                border-top-right-radius: 20px;
+                background-color: rgb(37, 37, 37);
+                margin: 0px;
+                width: 100%;
+                padding-top: 10px;
+                font-weight: bolder;
+                border: 5px solid rgb(0, 0, 0);
+            }
+            .body{
+                height: 55vh;
+                text-align: center;
+                margin-top: 30px;
+                overflow-y: auto;
+                .sentMessage{
+                    float: right;
+                    border: 2px solid black;
+                    border-radius: 20px;
+                    margin-right: 20px;
+                    padding: 10px;
+                    background-color: rgb(37, 37, 37);
+                    color:lightgreen;
+                    font-weight: bold;
+                    width: 65%;
+                    .messageHeader{
+                        padding-bottom: 5px;
+                        border-bottom: 2px solid black;
+                    }
+                    
+                }
+                .recievedMessage{
+                    float: left;
+                    border: 2px solid balck;
+                    border-radius: 20px;
+                    margin-left: 20px;
+                    padding: 10px;
+                    background-color: lightgreen;
+                    color:black;
+                    width: 65%;
+                }
+            }
+        }
+
+    }
+}
+
 
 

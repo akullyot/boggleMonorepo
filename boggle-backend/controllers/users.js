@@ -79,6 +79,7 @@ users.get('/', async (req, res) => {
 });
 //Purpose: gets an individuals profile
 users.get('/:username', async (req,res) => {
+    
 
 });
 //Purpose: allows users to edit their profile
@@ -95,6 +96,8 @@ users.post('/:username/acceptfriend', async (req,res) => {
 users.post('/:username/deletefriend', async (req,res) => {
 
 });
+
+
 
 
 

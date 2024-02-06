@@ -56,6 +56,7 @@ games.post('/newgame', async (req, res) => {
     }
 });
 
+//Purpose: given a seed, generate the correct board
 games.post('/joingame', async(req,res) => {
     try {
         let seed = req.body.seed;
@@ -89,13 +90,12 @@ games.post('/joingame', async(req,res) => {
         return res.status(200).json({boardMatrix:boardMatrix})
 
     } catch (error) {
-        res.status(409).json({message:'board generation failed'})
+
+        res.status(155).json({message:'board generation failed'})
     }
-
-
 });
 
-
+//Purpose: using the scrabble dictionary, create a trie and perform a DFS on said trie for each possible board path
 games.post('/findallwords', async(req,res) => {
     //TODO make a try catch here
     //We are using a trie approach through the entire dictionary to see if it exists on
@@ -175,9 +175,15 @@ games.post('/findallwords', async(req,res) => {
     res.status(200).json({wordsArray: validWordsArrayofObj})
 });
 
-
-games.post("/finishGame", async(req,res) => {
-
+//Purpose: push results to your database to do data analytics
+games.post("/logresults", async(req,res) => {
+    //All required information
+    //userID
+    //seed
+    //game Type (get from the seed)
+    //dice type (get from the seed)
+    //seconds Duration
+    //csv wordslist
 });
 
 

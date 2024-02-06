@@ -1,9 +1,16 @@
 //import in all hooks and dependencies
 import { useState, useEffect, useContext } from 'react';
+import { CurrentUser }                     from "../../Contexts/CurrentUser";
+import { useNavigate }                     from "react-router-dom";
+
 //All required media
 //All required Components
+import logo from '../../Assets/Images/blocks.png'
 import Chat from './Chat';
+import { spiral } from 'ldrs'
+
 //import in all bootsrap components
+import Toast from 'react-bootstrap/Toast';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 
@@ -12,6 +19,7 @@ import Form from 'react-bootstrap/Form';
 
 export default function BoggleGame ({socket, roomId, seed, boardMatrix, setBoardMatrix, createRoomFrontendGameInputs, roomParticipants }){
     //Required imports
+        const { currentUser } = useContext(CurrentUser);
     //All state variables
     //Handling the starting countdown
         const [toggleGameStartAnimation, setToggleGameStartAnimation] = useState(true);
@@ -35,12 +43,14 @@ export default function BoggleGame ({socket, roomId, seed, boardMatrix, setBoard
         const [allPlayerResultsGotten, setAllPlayerResultsGotten] = useState(false);
         const [resultsSavedMessage, setResultsSavedMessage] = useState("Results have not been saved to your user profile");//if backend save of results was successful
         const [winner, setWinner] = useState({username: "", score:""});
+    //HANDLING TOAST NOTIFICATIONS
+      //TODO right now there is only one toast and it will be rewritten if another result comes in before it closes. 
+      //toast notifications state variables
+      const [showToast, setShowToast] = useState(false);
+      const [toastType, setToastType] = useState('');
+      const [toastMessage, setToastMessage] = useState('');
 
 
-        
-
-    
-        
 
     //USEEFFECT game start countdown and get solns
     useEffect(() => {
@@ -106,48 +116,64 @@ export default function BoggleGame ({socket, roomId, seed, boardMatrix, setBoard
                 score: score
             };
             socket.emit('sendGameResults', userGameResults);
-
         }
     }, [isGameEnded]);
     //Every time you get back competitor results check if you have them all
     useEffect(() => {
         //check if all these usernames are present, this works fine if someone manages to leave after already sending their
         // results over, since they will be taken from roomparticipants but their results will stay
-        const sendResultsToBackend = async(resultsObj) => {
-            //
-            //if response.status === 200
-
+        const sendResultsToBackend = async (resultsData) => {
+            const response = await fetch(`${process.env.REACT_APP_NODE_SERVER_URL}/games/logresults`, {
+                method: 'POST',
+                headers: {
+                    'authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(resultsData)
+              });
+              const loggingStatus = await response.json();
+              if (response.status === 200){
+                //set a toast that your data has been logged
+                setShowToast(true)
+                setToastType('success');
+                setToastMessage('results saved! Thanks for playing');
+              }else{
+                //set a toast that an error occured
+                setShowToast(true)
+                setToastType('danger');
+                setToastMessage('Something happened when trying to store these results. Sorry :(');
+              };
         };
-
-
         if (otherPlayersScores.length >= roomParticipants.length){
             setAllPlayerResultsGotten(true);
             //find and set the winner
-            
+            const winnerObj = otherPlayersScores.reduce(function(prev, current) {
+                return (prev && prev.score > current.score) ? prev : current
+            });
+            setWinner(winnerObj);
+            const sortedValidWordsArray = validWordsArray.toSorted(function(a, b) {
+                return a.word.length - b.word.length || a.word.localeCompare(b.word)
+            });
+            console.log(sortedValidWordsArray);
+            const resultsData = {
+                seed             : seed,
+                minutesDuration  : createRoomFrontendGameInputs.minutesDuration,
+                wordList         : sortedValidWordsArray,
+                wasMultiplayer   : true,
+                didWind          : (winnerObj.username === currentUser.username) 
 
-            //send to the backend the results to be stored
-            //sendResultsToBackend()
-
+            };
+            sendResultsToBackend(resultsData);
         }
-
-    }, [otherPlayersScores])
-    //Every time you get user info check against 
-    useEffect(() => {
-        if (allPlayerResultsGotten){
-            //send your results over to the backend
-            console.log('here')
-            
-        }
-    }, [allPlayerResultsGotten]);
-
+    }, [otherPlayersScores]);
     //ALL SOCKET LISTEN EVENTS 
     useEffect(() => {
+        //upon game completion get all game results
         socket.on('recieveGameResults', (competitorResults) => {
             //add to the score if the username isnt already there
             const allUsersPresent = otherPlayersScores.map(scoreObj => {
                 return scoreObj.username
             });
-            console.log(competitorResults);
             if (!allUsersPresent.includes(competitorResults.username)){
                 setOtherPlayerResults((array) => [...array, competitorResults])
             };
@@ -425,55 +451,71 @@ export default function BoggleGame ({socket, roomId, seed, boardMatrix, setBoard
         </div>
     );
     const displayResults = (
-    <>
-        <div id="resultsTitle">
+    <div id="resultsContainer">
+        <div id="resultsTitle" data-bs-theme="dark" className="bg-dark bg-gradient text-white form">
             <h1> And the winner is..... {winner.username}!</h1>
-            <h2> Total Score {winner.score}</h2>
+            <h2> Total Score : {winner.score}</h2>
         </div>
         <div id="chatAndAllResultsHolder">
             <div id='allResultsHolder'>
-                {otherPlayersScores.map((scoreObj,index) => {
-                    return(
-                        <div className='playerResults'>
-                            <div className='header'>
-                                <h2>{scoreObj.username}'s Results:</h2>
-                                <h5> Total Score : {scoreObj.score} </h5>
+                <div id='playerHolder'>
+                    {otherPlayersScores.map((scoreObj,index) => {
+                        return(
+                            <div className='playerResults'>
+                                <div className='header'>
+                                    <h2>{scoreObj.username}'s Results:</h2>
+                                    <h5> Total Score : {scoreObj.score} </h5>
+                                </div>
+                                <div className="playerWordsFound bg-dark bg-gradient">
+                                    <ul>
+                                        {scoreObj.validWordsArray.map((wordObj, wordIndex) => {
+                                            return(
+                                                <li key={wordIndex}> {wordObj.word} : {wordObj.score} </li>
+                                            )
+                                        })}
+                                    </ul>
+                                </div>
                             </div>
-                            <div className='playerWordsFound'>
-                                <ul>
-                                    {scoreObj.validWordsArray.map((wordObj, wordIndex) => {
-                                        return(
-                                            <li key={wordIndex}> {wordObj.word} : {wordObj.score} </li>
-                                        )
-                                    })}
-                                </ul>
-                            </div>
-                        </div>
-                    );
-                })}
+                        );
+                    })}
+                </div>
+                <div id='solvedBoard'>
+                    <h2 className='header'> Total Number of Words: {solutions.length}</h2>
+                    <div className='bg-dark bg-gradient'>
+                        <ul >
+                            {solutions.map((solutionObj, index) => {
+                                return(
+                                    <li key={index}> {solutionObj.word} : {solutionObj.score} </li>
+                                );
+                            })}
+                        </ul> 
+                    </div>
+
+                </div>
+
             </div>
+
             <div id="chatHolder">
                 <Chat socket={socket} roomId={roomId} />
             </div>
         </div>
-        <div id='solvedBoard'>
-            <h2> Total Number of Words: {solutions.length}</h2>
-            <ul>
-                {solutions.map((solutionObj, index) => {
-                    return(
-                        <li key={index}> {solutionObj.word} : {solutionObj.score} </li>
-                    );
-                })}
-            </ul> 
-        </div>
+
         <div id="backendSavedSuccessNotif">
             <h3> {resultsSavedMessage} </h3>
         </div>
-    </>
+    </div>
 
     )
     return(
         <main>
+            <Toast onClose={() => setShowToast(false)} show={showToast} delay={6000} autohide style = {{position:'fixed', right: '40px', top: '10', width:'600px', height:'200px', zIndex:'10'}} bg={toastType} data-bs-theme="dark">
+                <Toast.Header>
+                    <img src={logo} style = {{height:'40px'}} className="rounded me-2" alt="" />
+                    <strong className="me-auto">Boggle</strong>
+                    <small>Now</small>
+                </Toast.Header>
+                    <Toast.Body > {toastMessage} </Toast.Body>
+            </Toast>
             {toggleGameStartAnimation ? displayStartAnimation : 
                 (isGameEnded ? (setAllPlayerResultsGotten ?  displayResults : displayWaitingResults)
                                 : displayGame)}

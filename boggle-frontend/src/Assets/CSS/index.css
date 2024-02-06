@@ -348,6 +348,153 @@
   min-height: 60px;
 }
 
+#resultsContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+#resultsContainer #resultsTitle {
+  margin-top: 5px;
+  width: max-content;
+  padding: 10px 30px;
+  margin-bottom: 0px;
+  border: 5px solid rgb(0, 0, 0);
+  color: lightgreen;
+}
+#resultsContainer #chatAndAllResultsHolder {
+  display: flex;
+  flex-direction: row;
+  margin-top: 30px;
+}
+#resultsContainer #chatAndAllResultsHolder #allResultsHolder {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 70vw;
+}
+#resultsContainer #chatAndAllResultsHolder #allResultsHolder #playerHolder {
+  display: flex;
+  flex-direction: row;
+  margin: 0px 10px;
+  justify-content: start;
+  margin-bottom: 40px;
+}
+#resultsContainer #chatAndAllResultsHolder #allResultsHolder #playerHolder .playerResults {
+  border-radius: 20px;
+  color: lightgreen;
+  width: 15vw;
+  margin-left: 30px;
+}
+#resultsContainer #chatAndAllResultsHolder #allResultsHolder #playerHolder .playerResults .header {
+  color: #90ee90;
+  text-align: center;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  background-color: rgb(37, 37, 37);
+  margin: 0px;
+  width: 100%;
+  padding-top: 10px;
+  font-weight: bolder;
+  border: 5px solid rgb(0, 0, 0);
+}
+#resultsContainer #chatAndAllResultsHolder #allResultsHolder #playerHolder .playerResults .playerWordsFound ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  align-items: center;
+  padding: 10px 50px;
+  margin-bottom: 0px;
+  min-height: 800px;
+}
+#resultsContainer #chatAndAllResultsHolder #allResultsHolder #playerHolder .playerResults .playerWordsFound ul li {
+  color: #90ee90;
+  font-size: 20px;
+  margin-top: 5px;
+}
+#resultsContainer #chatAndAllResultsHolder #allResultsHolder #solvedBoard {
+  margin-top: 20px;
+  width: 100%;
+  border-radius: 20px;
+  color: lightgreen;
+  width: 70vw;
+}
+#resultsContainer #chatAndAllResultsHolder #allResultsHolder #solvedBoard .header {
+  color: #90ee90;
+  text-align: center;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  background-color: rgb(37, 37, 37);
+  margin: 0px;
+  width: 100%;
+  padding-top: 10px;
+  font-weight: bolder;
+  border: 5px solid rgb(0, 0, 0);
+}
+#resultsContainer #chatAndAllResultsHolder #allResultsHolder #solvedBoard ul {
+  border-radius: 20px;
+  margin-top: 10px;
+  list-style: none;
+  width: 100%;
+}
+#resultsContainer #chatAndAllResultsHolder #allResultsHolder #solvedBoard ul li {
+  display: inline-block;
+  margin-right: 5px;
+  margin-bottom: 10px;
+  width: 160px;
+}
+#resultsContainer #chatAndAllResultsHolder #chatHolder {
+  width: 22vw;
+  padding: 0px;
+  margin: 0px 50px;
+  align-items: center;
+  border-radius: 20px;
+}
+#resultsContainer #chatAndAllResultsHolder #chatHolder .header {
+  color: #90ee90;
+  text-align: center;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  background-color: rgb(37, 37, 37);
+  margin: 0px;
+  width: 100%;
+  padding-top: 10px;
+  font-weight: bolder;
+  border: 5px solid rgb(0, 0, 0);
+}
+#resultsContainer #chatAndAllResultsHolder #chatHolder .body {
+  height: 55vh;
+  text-align: center;
+  margin-top: 30px;
+  overflow-y: auto;
+}
+#resultsContainer #chatAndAllResultsHolder #chatHolder .body .sentMessage {
+  float: right;
+  border: 2px solid black;
+  border-radius: 20px;
+  margin-right: 20px;
+  padding: 10px;
+  background-color: rgb(37, 37, 37);
+  color: lightgreen;
+  font-weight: bold;
+  width: 65%;
+}
+#resultsContainer #chatAndAllResultsHolder #chatHolder .body .sentMessage .messageHeader {
+  padding-bottom: 5px;
+  border-bottom: 2px solid black;
+}
+#resultsContainer #chatAndAllResultsHolder #chatHolder .body .recievedMessage {
+  float: left;
+  border: 2px solid balck;
+  border-radius: 20px;
+  margin-left: 20px;
+  padding: 10px;
+  background-color: lightgreen;
+  color: black;
+  width: 65%;
+}
+
 * {
   margin: 0px;
   padding: 0px;
