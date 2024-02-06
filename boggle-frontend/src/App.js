@@ -7,7 +7,7 @@ import Home             from './Components/Routes/Home'
 import SignUp           from './Components/Routes/SignUp'
 import Login            from './Components/Routes/Login'
 import CreateRoom       from './Components/Routes/CreateRoom'
-import JoinRoom         from './Components/Routes/JoinRoom'
+import JoinRoom         from './Components/Routes/JoinRoom2'
 
 import LeaderBoards     from './Components/Routes/Leaderboards'
 import BrowseUsers      from './Components/Routes/BrowseUsers'

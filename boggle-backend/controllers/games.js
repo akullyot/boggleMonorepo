@@ -26,7 +26,7 @@ games.post('/newgame', async (req, res) => {
             //seed structure: boardType_dieIndexRIdieRollIndex_....etc
             let seed = `4x4_`;
             let dieSet = null;
-            if(req.body.game === 'fourXFourClassic' ){
+            if(req.body.gameType === 'fourXFourClassic' ){
                 dieSet = fourXFourClassic;
                 seed= seed.concat('c_')
             }else{
@@ -57,6 +57,41 @@ games.post('/newgame', async (req, res) => {
 });
 
 games.post('/joingame', async(req,res) => {
+    try {
+        let seed = req.body.seed;
+        const [ boardSizeKey, diceTypeKey, boardValues] = seed.split("_");
+        let dieSet = null;
+        let boardSize = null;
+        if (boardSizeKey === '4x4'){
+            boardSize = 4;
+            if(diceTypeKey === 'c' ){
+                 dieSet= fourXFourClassic;
+            }else{
+                dieSet = fourXFourNew;
+            }
+        }else{
+            throw 'die type not supported yet'
+        }
+        //Make your board array from the seed
+        const allDiceKeys = boardValues.split("die"); // 4R4, die 4, side 4
+        allDiceKeys.shift();
+        let boardArray = [];
+        allDiceKeys.forEach(dieKey => {
+            let [die, side] = dieKey.split("R");
+
+            boardArray.push(dieSet[`die${die}`][Number(side)])
+        });
+        let boardMatrix = [];
+        //4x4 2d array
+        while(boardArray.length){
+            boardMatrix.push(boardArray.splice(0,boardSize))
+        };
+        return res.status(200).json({boardMatrix:boardMatrix})
+
+    } catch (error) {
+        res.status(409).json({message:'board generation failed'})
+    }
+
 
 });
 
@@ -109,6 +144,7 @@ games.post('/findallwords', async(req,res) => {
     validWords = [];
     results.forEach(resultObj => {
         if (resultObj.word.length >= 3){
+            if (!validWords.includes(resultObj.word))
             validWords.push(resultObj.word)
         };
     });
@@ -116,12 +152,33 @@ games.post('/findallwords', async(req,res) => {
     validWords.sort(function(a, b) {
         return a.length - b.length || a.localeCompare(b)
     });
-    console.log(validWords);
-    res.status(200).json({wordsArray: validWords, length: validWords.length})
+    //now lets get the scores for each word
+    const validWordsArrayofObj = validWords.map((word) => {
+        //lets get the score
+        let thisScore = 0;
+        if (word.length === 3 || word.length === 4 ){
+             thisScore = 1;
+        }else if (word.length === 5){
+             thisScore = 2;
+        }else if (word.length === 6){
+             thisScore = 3;
+        }else if (word.length === 7){
+             thisScore = 5;
+        }else if (word.length >= 8){
+             thisScore = 11;
+        }
+        return ({
+            word: word,
+            score:  thisScore
+        });
+    })
+    res.status(200).json({wordsArray: validWordsArrayofObj})
 });
+
+
 games.post("/finishGame", async(req,res) => {
 
-})
+});
 
 
 

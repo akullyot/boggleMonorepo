@@ -32,6 +32,7 @@
         width: 20vw;
         height: 90vh;
         border-radius: 20px;
+        position: relative;
         .header{
             color:#90ee90;
             text-align: center;
@@ -43,6 +44,25 @@
             padding-top: 10px;
             font-weight: bolder;
             border: 5px solid rgb(0, 0, 0);
+        }
+        ul{
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-y: auto;
+            li{
+                font-weight: bold;
+                color: #90ee90;
+                font-size: 30px;
+                text-align: center;
+            }
+        }
+        #wordCounter{
+            position: absolute;
+            bottom: 0px;
+            color: #90ee90;
+            margin-left: 10px;
         }
     }
     #gamePlayerArea{
@@ -65,6 +85,7 @@
             padding: 20px 50px;
             font-weight: bolder;
             border: 5px solid rgb(0, 0, 0);
+            text-transform: uppercase;
             h4{
                 margin-right: 60px
             }
@@ -96,12 +117,49 @@
                     margin: 5px;
                 }
             }
-
-
-
         }
         #inputBox{
-            height: 10vh;
+            color:#90ee90;
+            text-align: center;
+            border-radius: 20px;
+            background-color: rgb(37, 37, 37);
+            padding: 20px 50px;
+            font-weight: bolder;
+            border: 5px solid rgb(0, 0, 0);
+            width: 80%;
+            display: flex;
+            flex-direction: column;
+            form{
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-direction: row;
+                label{
+                    width: 300px;
+                    text-transform: uppercase;
+                    font-size: 20px;
+                    margin-top: 10px;
+                }
+                input{
+                    padding: 20px;
+                    font-size: 20px;
+                }
+                button{
+                    background-color: lightgreen;
+                    margin-left: 20px;
+                    color: black;
+                    border: 2px solid black;
+                    text-transform: uppercase;
+                }
+            }
+            #inputError{
+                font-size: 20px;
+                color: red;
+                text-transform: uppercase;
+                margin-top: 5px;
+                width: 100%;
+                min-height: 60px;
+            }
         }
     }
 

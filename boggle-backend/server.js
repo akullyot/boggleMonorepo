@@ -63,7 +63,7 @@ io.on("connection", (socket) => {
                 //GAME DETAILS
                 io.of("/").adapter.rooms.get(roomId).seed             = roomStreamedInfo.seed; 
                 io.of("/").adapter.rooms.get(roomId).minutesDuration  = roomStreamedInfo.minutesDuration;
-                //is autocheck
+                io.of("/").adapter.rooms.get(roomId).isAutoCheck      = roomStreamedInfo.isAutoCheck;
                 //dictionary used 
                 //emit a success message that you created the room
                 io.in(roomId).emit("roomCreationSuccess", {
@@ -83,69 +83,75 @@ io.on("connection", (socket) => {
             }
         }else{
             try {
+                //for some reason, likely due to useeffect, its trying to make you join twice
                 let roomId = roomStreamedInfo.roomId;
                 //check if they asked to join a room that exists
                 if (io.sockets.adapter.rooms.get(roomId) === undefined){
                     throw 'this room does not exist';
                 };
-                //check if the game is already in progress
-                if (io.of("/").adapter.rooms.get(roomId).isInProgress) {
-                    throw 'this game is already in progress'
-                }
-                //check if it is at max capacity
-                if (io.of("/").adapter.rooms.get(roomId).maxSize <= io.of("/").adapter.rooms.get(roomId).users.length) {
-                    throw 'this game is full'
-                }
-                //check if the room is private
-                if (io.of("/").adapter.rooms.get(roomId).isPrivate){
-                    //check if they are friends with the owner
-                    let creatorId = io.of("/").adapter.rooms.get(roomId).creatorId;
-                    //note: both AB and BA exist if they are friends so this should be fine
-                    let areFriends = await User_Auth.findOne({ where: {
-                        friendOneId: userId,
-                        friendTwoId : creatorId,
-                        isPending: false
-                    }});
-                    if (!areFriends){
-                        throw 'this game is private, thus you must be friends with the creator to join'
-                    }                    
-                }
-                //If you get here you are allowed to join
-                await socket.join(roomId);
-                //add yourself to the users list
-                io.of("/").adapter.rooms.get(roomId).users.push({username: userUsername, userId:userId});
-                //to make it eaier on the front end, get the creator username by looping through and finding it from the .users
-                let creatorUsername = '';
-                io.of("/").adapter.rooms.get(roomId).users.forEach((userObj) => {
-                    if (userObj.userId == io.of("/").adapter.rooms.get(roomId).creatorId){
-                        creatorUsername = userObj.username
-                    } 
-                })
-                io.to(`user:${userId}`).emit("roomJoinSuccess", {
-                    message     : `you have joined room ${roomId}`,
-                    roomCreator : creatorUsername,
-                    maxSize     : io.of("/").adapter.rooms.get(roomId).maxSize,
-                    isPrivate   : io.of("/").adapter.rooms.get(roomId).isPrivate,
-                    seed        : io.of("/").adapter.rooms.get(roomId).seed  
+                //Now check if this is the double throw by the useEffect
+                let usernameList = io.of("/").adapter.rooms.get(roomId).users.map(userObj => {
+                    return userObj.username
                 });
+                if (!usernameList.includes(userUsername)){
+                    //check if the game is already in progress
+                    if (io.of("/").adapter.rooms.get(roomId).isInProgress) {
+                        throw 'this game is already in progress'
+                    }
+                    //check if it is at max capacity
+                    if (io.of("/").adapter.rooms.get(roomId).maxSize <= io.of("/").adapter.rooms.get(roomId).users.length) {
+                        throw 'this game is full'
+                    }
+                    //check if the room is private
+                    if (io.of("/").adapter.rooms.get(roomId).isPrivate){
+                        //check if they are friends with the owner
+                        let creatorId = io.of("/").adapter.rooms.get(roomId).creatorId;
+                        //note: both AB and BA exist if they are friends so this should be fine
+                        let areFriends = await User_Auth.findOne({ where: {
+                            friendOneId: userId,
+                            friendTwoId : creatorId,
+                            isPending: false
+                        }});
+                        if (!areFriends){
+                            throw 'this game is private, thus you must be friends with the creator to join'
+                        }                    
+                    }
+                    //If you get here you are allowed to join
+                    await socket.join(roomId);
+                    //add yourself to the users list
+                    io.of("/").adapter.rooms.get(roomId).users.push({username: userUsername, userId:userId});
+                    //to make it eaier on the front end, get the creator username by looping through and finding it from the .users
+                    let creatorUsername = '';
+                    io.of("/").adapter.rooms.get(roomId).users.forEach((userObj) => {
+                        if (userObj.userId == io.of("/").adapter.rooms.get(roomId).creatorId){
+                            creatorUsername = userObj.username
+                        } 
+                    });
+                    io.to(`user:${userId}`).emit("roomJoinSuccess", {
+                        message         : `you have joined room ${roomId}`,
+                        roomCreator     : creatorUsername,
+                        maxSize         : io.of("/").adapter.rooms.get(roomId).maxSize,
+                        isPrivate       : io.of("/").adapter.rooms.get(roomId).isPrivate,
+                        seed            : io.of("/").adapter.rooms.get(roomId).seed,
+                        minutesDuration : io.of("/").adapter.rooms.get(roomId).minutesDuration,
+                        isAutoCheck     : io.of("/").adapter.rooms.get(roomId).isAutoCheck
+                    });
 
-                let emittedCountObj = {};
-                io.of("/").adapter.rooms.get(roomId).users.map((Obj)=>{
-                    emittedCountObj[Obj.userId] = Obj.username;
-                });
 
-                io.in(roomId).emit("recieveRoomCount", {
-                    roomId         : roomId,
-                    roomUsers      : emittedCountObj,
-                    roomCreatorId  : io.of("/").adapter.rooms.get(roomId).creatorId
-                });
+                    io.in(roomId).emit("recieveRoomCount", {
+                        roomId         : roomId,
+                        roomUsers      : io.of("/").adapter.rooms.get(roomId).users,
+                        roomCreatorId  : io.of("/").adapter.rooms.get(roomId).creatorId
+                    });
+                    console.log(`user with ID ${socket.id} and username ${userUsername} joined room ${roomId}`);
+
+                }
             } catch (error) {
                 //eventually need to write a socket to handle this
                 io.to(`user:${userId}`).emit("roomJoinFailure", {message: error});
             };
         };
     });
-
 
     socket.on("sendMessage", (messageInfo) => {
         //Now send to the frontend to anyone in the same room
@@ -165,6 +171,21 @@ io.on("connection", (socket) => {
         //set the game to in progress so nobody else can join
         io.of("/").adapter.rooms.get(roomStreamedInfo.roomId).isInProgress  = true;
         io.in(roomStreamedInfo.roomId).emit('startGame')
+    });
+
+    //END GAME INFORMATION
+    //Purpose: sends over each individuals results
+    socket.on("sendGameResults", (resultsInfo) => {
+
+        console.log(resultsInfo);
+
+        //TODO change to everyone but the sender eventually
+        io.in(resultsInfo.roomId).emit("recieveGameResults", {
+            username: userUsername,
+            validWordsArray: resultsInfo.validWordsArray,
+            score: resultsInfo.score
+        });
+
     });
 
     socket.on("disconnect", async () => {

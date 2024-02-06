@@ -218,6 +218,7 @@
   width: 20vw;
   height: 90vh;
   border-radius: 20px;
+  position: relative;
 }
 #boggleGameArea #gameFoundWords .header {
   color: #90ee90;
@@ -230,6 +231,25 @@
   padding-top: 10px;
   font-weight: bolder;
   border: 5px solid rgb(0, 0, 0);
+}
+#boggleGameArea #gameFoundWords ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-y: auto;
+}
+#boggleGameArea #gameFoundWords ul li {
+  font-weight: bold;
+  color: #90ee90;
+  font-size: 30px;
+  text-align: center;
+}
+#boggleGameArea #gameFoundWords #wordCounter {
+  position: absolute;
+  bottom: 0px;
+  color: #90ee90;
+  margin-left: 10px;
 }
 #boggleGameArea #gamePlayerArea {
   width: 75vw;
@@ -252,6 +272,7 @@
   padding: 20px 50px;
   font-weight: bolder;
   border: 5px solid rgb(0, 0, 0);
+  text-transform: uppercase;
 }
 #boggleGameArea #gamePlayerArea #timer h4 {
   margin-right: 60px;
@@ -284,7 +305,47 @@
   margin: 5px;
 }
 #boggleGameArea #gamePlayerArea #inputBox {
-  height: 10vh;
+  color: #90ee90;
+  text-align: center;
+  border-radius: 20px;
+  background-color: rgb(37, 37, 37);
+  padding: 20px 50px;
+  font-weight: bolder;
+  border: 5px solid rgb(0, 0, 0);
+  width: 80%;
+  display: flex;
+  flex-direction: column;
+}
+#boggleGameArea #gamePlayerArea #inputBox form {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+}
+#boggleGameArea #gamePlayerArea #inputBox form label {
+  width: 300px;
+  text-transform: uppercase;
+  font-size: 20px;
+  margin-top: 10px;
+}
+#boggleGameArea #gamePlayerArea #inputBox form input {
+  padding: 20px;
+  font-size: 20px;
+}
+#boggleGameArea #gamePlayerArea #inputBox form button {
+  background-color: lightgreen;
+  margin-left: 20px;
+  color: black;
+  border: 2px solid black;
+  text-transform: uppercase;
+}
+#boggleGameArea #gamePlayerArea #inputBox #inputError {
+  font-size: 20px;
+  color: red;
+  text-transform: uppercase;
+  margin-top: 5px;
+  width: 100%;
+  min-height: 60px;
 }
 
 * {

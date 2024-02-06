@@ -1,6 +1,8 @@
 //import in all hooks and dependencies
 import { useState, useEffect, useContext } from 'react';
 //All required media
+//All required Components
+import Chat from './Chat';
 //import in all bootsrap components
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
@@ -8,7 +10,7 @@ import Form from 'react-bootstrap/Form';
 
 
 
-export default function BoggleGame ({socket, roomId, seed, boardMatrix, setBoardMatrix,createRoomFrontendGameInputs }){
+export default function BoggleGame ({socket, roomId, seed, boardMatrix, setBoardMatrix, createRoomFrontendGameInputs, roomParticipants }){
     //Required imports
     //All state variables
     //Handling the starting countdown
@@ -22,15 +24,25 @@ export default function BoggleGame ({socket, roomId, seed, boardMatrix, setBoard
             minutes: createRoomFrontendGameInputs.minutesDuration,
             seconds: 0
         });
-        const [isGameEnded, setisGameEnded] = useState(false);
     //Input state variables
         const [guess, setGuess] = useState('');
-    //In the background have your backend is calculating all solns
-        const [allWordsFound, setAllWordsFound] = useState(false)
+        const [inputError, setInputError] = useState("");
+    //Game End stateVariables
+        const [isGameEnded, setisGameEnded] = useState(false);
+        const [solutions, setSolutions] = useState([]);
+        const [otherPlayersScores, setOtherPlayerResults] = useState([]); //an array of objects
+    //Final results statevariables
+        const [allPlayerResultsGotten, setAllPlayerResultsGotten] = useState(false);
+        const [resultsSavedMessage, setResultsSavedMessage] = useState("Results have not been saved to your user profile");//if backend save of results was successful
+        const [winner, setWinner] = useState({username: "", score:""});
+
+
+        
+
     
         
 
-    //USEEFFECT game start countdown
+    //USEEFFECT game start countdown and get solns
     useEffect(() => {
         setTimeout(() => {
             setToggleCountdown(2);
@@ -41,6 +53,7 @@ export default function BoggleGame ({socket, roomId, seed, boardMatrix, setBoard
                 }, 1000)
             }, 1000)
         }, 1000);
+        //while we are at it get the answers
         const findAllWordsAPICall = async () => {
           console.log(process.env.REACT_APP_NODE_SERVER_URL)  
           const response = await fetch(`${process.env.REACT_APP_NODE_SERVER_URL}/games/findallwords`,{
@@ -51,6 +64,10 @@ export default function BoggleGame ({socket, roomId, seed, boardMatrix, setBoard
                 },
                 body: JSON.stringify({boardMatrix: boardMatrix})   
           });
+          const solvedData = await response.json();
+          if (response.status === 200){
+                setSolutions(solvedData.wordsArray);
+          }
         };
         findAllWordsAPICall();
     },[]);
@@ -75,27 +92,70 @@ export default function BoggleGame ({socket, roomId, seed, boardMatrix, setBoard
             return () => clearInterval(timerInterval);
         }
     }, [toggleGameStartAnimation])
-    //End the game and send over results to the socker
+    //End the game and send over results to the socket
     useEffect( () => {
         if (isGameEnded){
             // take your guess array and sort from smallest to largest, then alphabetically
             // also send over total score
-
+            const sortedValidWordsArray = validWordsArray.toSorted(function(a, b) {
+                return a.word.length - b.word.length || a.word.localeCompare(b.word)
+            });
             let userGameResults = {
-                
+                roomId: roomId,
+                validWordsArray: sortedValidWordsArray,
+                score: score
             };
             socket.emit('sendGameResults', userGameResults);
-            //send over relevant information to the backend to keep track of game results for each user
+
+        }
+    }, [isGameEnded]);
+    //Every time you get back competitor results check if you have them all
+    useEffect(() => {
+        //check if all these usernames are present, this works fine if someone manages to leave after already sending their
+        // results over, since they will be taken from roomparticipants but their results will stay
+        const sendResultsToBackend = async(resultsObj) => {
+            //
+            //if response.status === 200
+
+        };
+
+
+        if (otherPlayersScores.length >= roomParticipants.length){
+            setAllPlayerResultsGotten(true);
+            //find and set the winner
+            
+
+            //send to the backend the results to be stored
+            //sendResultsToBackend()
+
         }
 
-    }, [isGameEnded])
+    }, [otherPlayersScores])
+    //Every time you get user info check against 
+    useEffect(() => {
+        if (allPlayerResultsGotten){
+            //send your results over to the backend
+            console.log('here')
+            
+        }
+    }, [allPlayerResultsGotten]);
+
     //ALL SOCKET LISTEN EVENTS 
     useEffect(() => {
         socket.on('recieveGameResults', (competitorResults) => {
-            // {username: username, score:score, words: words}
-        })
+            //add to the score if the username isnt already there
+            const allUsersPresent = otherPlayersScores.map(scoreObj => {
+                return scoreObj.username
+            });
+            console.log(competitorResults);
+            if (!allUsersPresent.includes(competitorResults.username)){
+                setOtherPlayerResults((array) => [...array, competitorResults])
+            };
+        });
+
+
         return () => {
-            socket.off('recieveGameResults')
+            socket.off('recieveGameResults');
         }
     }, [socket])
 
@@ -103,6 +163,10 @@ export default function BoggleGame ({socket, roomId, seed, boardMatrix, setBoard
 
     //Handling submitting guesses, just checks if each new keystroke is nearby
     useEffect(() => {
+        //remove the error message if present
+        if (inputError !== "" && guess.length > 2){
+            setInputError("");
+        }
         //every time guess changes, check if its a valid board possibility
         //NOTE: THIS DOESNT CHECK FOR REPEATS, THATS HANDLED UPON SUBMISSION
         let formattedGuess = guess.toUpperCase();
@@ -178,9 +242,7 @@ export default function BoggleGame ({socket, roomId, seed, boardMatrix, setBoard
             }else{
                 setGuess(formattedGuess.toUpperCase()); 
             }
-
         }
-
     }, [guess]);
 
     const handleGuess = async (e) => {
@@ -296,17 +358,27 @@ export default function BoggleGame ({socket, roomId, seed, boardMatrix, setBoard
             //show this somehow
             console.log(error);
             setGuess("");
+            setInputError(error);
         }
     };
 
 
-
+    //note change the css id to a class
     const displayStartAnimation = (
         <div id="startAnimation" className='bg-dark bg-gradient'>
             <l-spiral size="70"speed="1.6" color="lightgreen"></l-spiral>
             <h2>Game Starts in {toggleCountdown}</h2>
         </div>
-    )
+    );
+    const displayWaitingResults = (
+        <div id="startAnimation" className='bg-dark bg-gradient'>
+            <l-spiral size="70"speed="1.6" color="lightgreen"></l-spiral>
+            <h2>Great Job! Please Wait for all Results to Come in and dont navigate away! :3 </h2>
+            <h3> Your score: {score}</h3>
+    </div>
+    );
+    //make it toggle off if the game has ended
+
     const displayGame = (
         <div id='boggleGameArea'>
             <section id= 'gameFoundWords' className='bg-dark bg-gradient'>
@@ -323,7 +395,7 @@ export default function BoggleGame ({socket, roomId, seed, boardMatrix, setBoard
                         );
                     })}
                 </ul>
-                <h4> Words Found: {validWordsArray.length} </h4>
+                <h4 id="wordCounter"> Words Found: {validWordsArray.length} </h4>
             </section>
             <section id='gamePlayerArea' >
                 <div id="timer">
@@ -343,18 +415,68 @@ export default function BoggleGame ({socket, roomId, seed, boardMatrix, setBoard
                 </div>
                 <div id="inputBox" className='bg-dark bg-gradient'>
                     <Form data-bs-theme="dark"  onSubmit={handleGuess}>
-                        <Form.Label>Guess</Form.Label>
+                        <Form.Label>Type a guess</Form.Label>
                         <Form.Control type="text" value={guess} onChange={e => setGuess(e.target.value)} />
-                        <Button variant="primary" type="submit">Submit</Button>
+                        <Button type="submit">Submit</Button>
                     </Form>
+                    <div id="inputError">{inputError}</div>
                 </div>
             </section>
         </div>
     );
+    const displayResults = (
+    <>
+        <div id="resultsTitle">
+            <h1> And the winner is..... {winner.username}!</h1>
+            <h2> Total Score {winner.score}</h2>
+        </div>
+        <div id="chatAndAllResultsHolder">
+            <div id='allResultsHolder'>
+                {otherPlayersScores.map((scoreObj,index) => {
+                    return(
+                        <div className='playerResults'>
+                            <div className='header'>
+                                <h2>{scoreObj.username}'s Results:</h2>
+                                <h5> Total Score : {scoreObj.score} </h5>
+                            </div>
+                            <div className='playerWordsFound'>
+                                <ul>
+                                    {scoreObj.validWordsArray.map((wordObj, wordIndex) => {
+                                        return(
+                                            <li key={wordIndex}> {wordObj.word} : {wordObj.score} </li>
+                                        )
+                                    })}
+                                </ul>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+            <div id="chatHolder">
+                <Chat socket={socket} roomId={roomId} />
+            </div>
+        </div>
+        <div id='solvedBoard'>
+            <h2> Total Number of Words: {solutions.length}</h2>
+            <ul>
+                {solutions.map((solutionObj, index) => {
+                    return(
+                        <li key={index}> {solutionObj.word} : {solutionObj.score} </li>
+                    );
+                })}
+            </ul> 
+        </div>
+        <div id="backendSavedSuccessNotif">
+            <h3> {resultsSavedMessage} </h3>
+        </div>
+    </>
+
+    )
     return(
         <main>
-            {toggleGameStartAnimation ? displayStartAnimation : displayGame}
-            {}
+            {toggleGameStartAnimation ? displayStartAnimation : 
+                (isGameEnded ? (setAllPlayerResultsGotten ?  displayResults : displayWaitingResults)
+                                : displayGame)}
         </main>
     )
 }

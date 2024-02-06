@@ -21,7 +21,7 @@ export default function CreateRoom() {
 //Required imports
   const { currentUser } = useContext(CurrentUser);
   const navigate = useNavigate();
-  spiral.register()
+  spiral.register();
 
 //All state Variables
     //FORM vars
@@ -40,9 +40,9 @@ export default function CreateRoom() {
       const [createRoomFrontendGameInputs, setCreateRoomFrontendGameInputs] = useState({
           minutesDuration:5,
           // others that will be eventually added 
-          isVoting: false, //after the game lobby can vote on validity 
-          turnOnAutoCheck: false,
-          dictionaryUsed: 'scrabble'
+          isVoting: false, //after the game lobby can vote on validity, eventually will implement
+          turnOnAutoCheck: false, // eventually want to change this to be autocheck on keystroke, then diff variable for checking word against dict
+          dictionaryUsed: 'scrabble' //eventually will implement
       });
     //HANDLING FORM SUBMISSION 
       //display toggler state variable
@@ -79,7 +79,8 @@ useEffect(() => {
   useEffect(() => {
       //GENERAL LOBBY LISTENERS
     socket.on('recieveRoomCount', (roomInfo) => {
-      //the setting of arrays using setstate is proving to be very finicky. Im going to make this a csl string to avoid these problems
+
+      console.log(roomInfo)
       setRoomParticipants(roomInfo.roomUsers)
       // Watch for if its over the max value and change the button inputs
       setRoomInformation({...roomInformation, roomSize: `There are ${roomInfo.roomUsers.length} / ${createRoomInputs.maxSize} present`});
@@ -119,6 +120,11 @@ useEffect(() => {
       socket.on("startGame", () => {
           setGameIsStarted(true);
       });
+    //if you are somehow disconnected
+      socket.on("disconnect", (disconnectMessage) => {        
+        console.log(disconnectMessage); // youre likely expecting this to be "transport close"
+        navigate('/?leftGame=error');
+      })
 
     //after you recieve an emission, take off the listener to prevent double listens
     return () => {
@@ -127,6 +133,9 @@ useEffect(() => {
       socket.off("roomCreationFailure");
       socket.off('kickUserSucess');
       socket.off('kickUserFailure');
+      socket.off('disconnect');
+      socket.off('joinRoom');
+
     }
     }, [socket])
 //BUTTONS
@@ -137,7 +146,7 @@ useEffect(() => {
           if (!currentUser){
             throw 'you must be logged in first before creating a room'
           }
-          const response = await fetch(`http://localhost:5000/games/newgame`, {
+          const response = await fetch(`${process.env.REACT_APP_NODE_SERVER_URL}/games/newgame`, {
             method: 'POST',
             headers: {
                 'authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -155,7 +164,7 @@ useEffect(() => {
             socket.connect();
             //todo: you actually need to add in the seed for the other players, and isAutocheck
             // so they know what to send to express
-            socket.emit("joinRoom", {...createRoomInputs, seed: boardData.seed });
+            socket.emit("joinRoom", {...createRoomInputs, seed: boardData.seed, minutesDuration: createRoomFrontendGameInputs.minutesDuration, isAutoCheck: createRoomFrontendGameInputs.turnOnAutoCheck });
           }else{
             throw 'error in creating the game board. Please try again.'
           }
@@ -181,9 +190,6 @@ useEffect(() => {
       } catch (error) {
         console.log(error)
       }
-
-
-
     };
     const handleAbandonGame = () => {
         //Sockets handle disconnects quite well, just navigate home with a message that the game has left
@@ -262,7 +268,7 @@ useEffect(() => {
           <Form.Group className="mb-3" controlId="formBasicCheckbox">
               <Form.Check 
                 type="checkbox" 
-                label="Autocheck All User Inputs" 
+                label="Autocheck All Submitted Answers Against a Dictionary" 
                 value={createRoomFrontendGameInputs.turnOnAutoCheck}
                 onChange={e => setCreateRoomFrontendGameInputs({ ...createRoomFrontendGameInputs, turnOnAutoCheck: e.target.value })}
                 required
@@ -312,7 +318,6 @@ useEffect(() => {
               }
             })}
           </div>
-  
         </div>
       )
     }
@@ -341,7 +346,7 @@ useEffect(() => {
       </>
     );
     //The game holder
-    const displayGame = gameIsStarted && <BoggleGame socket={socket} roomId={roomId} seed={createRoomGameInputs.seed} boardMatrix = {boardMatrix} setBoardMatrix={setBoardMatrix} createRoomFrontendGameInputs= {createRoomFrontendGameInputs}/>;
+    const displayGame = gameIsStarted && <BoggleGame socket={socket} roomId={roomId} seed={createRoomGameInputs.seed} boardMatrix = {boardMatrix} setBoardMatrix={setBoardMatrix} createRoomFrontendGameInputs= {createRoomFrontendGameInputs} roomParticipants={roomParticipants}/>;
 
 
 

@@ -1,6 +1,6 @@
 
 //Import in all hooks and dependencies
-import { useState, useEffect, useContext, useRef   } from 'react';
+import { useState, useEffect, useContext   } from 'react';
 import { useParams }                                 from 'react-router-dom';
 import { CurrentUser }                             from "../../Contexts/CurrentUser"
 import { socket }                                  from  "../../Contexts/Socket"
