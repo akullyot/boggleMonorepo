@@ -94,6 +94,7 @@ export default function JoinRoom2 (){
                         isPrivate: roomData.isPrivate ? 'Only those that are friends with the room creator can join' : 'Anyone logged in may join',
                         maxSize: roomData.maxSize
                     });
+
                     setCreateRoomFrontendGameInputs({ ...createRoomFrontendGameInputs,
                         minutesDuration : roomData.minutesDuration,
                         turnOnAutoCheck: roomData.isAutocheck
@@ -136,6 +137,9 @@ export default function JoinRoom2 (){
                   setIsRoomFull(false)
                 };
               });
+              socket.on("startGame", () => {
+                    setGameIsStarted(true);
+              })
 
             socket.on("disconnect", (disconnectMessage) => {        
                 console.log(disconnectMessage); // youre likely expecting this to be "transport close"
@@ -148,6 +152,7 @@ export default function JoinRoom2 (){
                 socket.off('joinRoomFailure');
                 socket.off('recieveRoomCount')
                 socket.off('joinRoom');
+                socket.off('startGame');
             }
         },[socket]);
     
@@ -182,11 +187,10 @@ export default function JoinRoom2 (){
                 <button onClick = {handleRedirectToHome}> Return Home</button>
             </div>
         );
-        const displayLobby = (
+        let displayLobby = (
             <>
             </>
         )
-        /*
         if (gameIsLoaded){
             displayLobby = (
                 <>
@@ -238,7 +242,6 @@ export default function JoinRoom2 (){
             )
 
         };
-        */
         const displayGame = gameIsStarted && <BoggleGame socket={socket} roomId={roomId} seed={seed} boardMatrix = {boardMatrix} setBoardMatrix={setBoardMatrix} createRoomFrontendGameInputs= {createRoomFrontendGameInputs} roomParticipants={roomParticipants}/>;
 
 
@@ -254,8 +257,6 @@ export default function JoinRoom2 (){
                 <Toast.Body > {toastMessage} </Toast.Body>
             </Toast>
             {gameIsStarted ? displayGame : displayLobby}
-            
-
         </main>
 
     )
