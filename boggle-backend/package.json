@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "The node backend of a boggle application",
   "main": "server.js",
+  "engines": {
+    "node": "20.x",
+    "npm": "10.2.5"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

@@ -186,6 +186,7 @@ export default function JoinRoom2 (){
             <>
             </>
         )
+        /*
         if (gameIsLoaded){
             displayLobby = (
                 <>
@@ -237,6 +238,7 @@ export default function JoinRoom2 (){
             )
 
         };
+        */
         const displayGame = gameIsStarted && <BoggleGame socket={socket} roomId={roomId} seed={seed} boardMatrix = {boardMatrix} setBoardMatrix={setBoardMatrix} createRoomFrontendGameInputs= {createRoomFrontendGameInputs} roomParticipants={roomParticipants}/>;
 
 
