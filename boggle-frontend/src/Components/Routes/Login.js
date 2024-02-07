@@ -30,6 +30,7 @@ export default function Login() {
             };
             setValidated(true);
             e.preventDefault();
+            console.log(process.env.REACT_APP_NODE_SERVER_URL)
             const response = await fetch(`${process.env.REACT_APP_NODE_SERVER_URL}/authentication/`, {
                 method: 'POST',
                 headers: {

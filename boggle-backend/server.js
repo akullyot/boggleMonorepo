@@ -23,6 +23,10 @@ app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(defineCurrentUser);
+//have node serve the files for our build react app
+app.use(express.static(path.resolve(__dirname, '../boggle-frontend/build')));
+
+
 const io = new Server(server, {cors : {origin: process.env.REACT_SERVER, methods: ["GET", "POST"], }});
 io.engine.use(defineCurrentUserSocket);
 

@@ -4,11 +4,11 @@
   "description": "The node backend of a boggle application",
   "main": "server.js",
   "engines": {
-    "node": "20.x",
-    "npm": "10.2.5"
+    "node": "20.x"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server/index.js",
+    "build": "cd boggle-frontend && npm install && npm run build"
   },
   "author": "Annie Ullyot",
   "license": "ISC",
