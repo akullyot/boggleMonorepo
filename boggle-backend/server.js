@@ -232,6 +232,9 @@ io.on("connection", (socket) => {
 
 
 //ROUTES
+app.get("/api", (req, res) => {
+    res.json({ message: "Hello from server!" });
+  });
     //CONTROLLER ROUTES
 app.use('/users',          require('./controllers/users'));
 app.use('/authentication', require('./controllers/authentication'));
