@@ -20,8 +20,6 @@ The current, MVP is available at the following link: https://boggle-frontend.ver
     1. Coming soon...
 - **Social Media**
     1. Coming soon...
--**Single Player Mode**
-   1. Coming soon
 
 ## Getting Started
 
