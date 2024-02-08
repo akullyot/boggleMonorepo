@@ -20,7 +20,8 @@ The current, MVP is available at the following link: https://boggle-frontend.ver
     1. Coming soon...
 - **Social Media**
     1. Coming soon...
--**
+-**Single Player Mode**
+   1. Coming soon
 
 ## Getting Started
 
@@ -49,10 +50,11 @@ A step-by-step series of examples that tell you how to get a development environ
   ```bash
   cd boggle-backend
   ```
-3. **Install dependencies:
+3. **Install dependencies and create a postgre database locally and migrate the table structure:
 
   ```bash
   npm install
+  npx sequelize-cli::migrate
   ```
 4. **Set up environment variables:
 
@@ -67,10 +69,18 @@ Create a .env file in the backend directory and add the necessary configurations
 
 The server will start running on the port designated by the .env.
 
+6. **Navigate to the boggle-frontend directory
+   
+ ```bash
+  npm install
+  ```
 
-## API Documentation
+8. ** And run the front end
 
-The backend API 
+```bash
+  npm start
+```
+
 
 
 
