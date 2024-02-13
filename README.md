@@ -43,22 +43,27 @@ A step-by-step series of examples that tell you how to get a development environ
   git clone https://github.com/akullyot/boggleMonorepo.git
   ```
 
-2. **Navigate to the boggle-backend directory:
+2. **Navigate to the boggle-backend directory:**
 
   ```bash
   cd boggle-backend
   ```
-3. **Install dependencies and create a postgre database locally and migrate the table structure:
+3. **Install dependencies:**
 
   ```bash
   npm install
-  npx sequelize-cli::migrate
+  npx sequelize::migrate
   ```
-4. **Set up environment variables:
+4. **reate a postgre database locally and migrate the table structure:**
+
+  ```bash
+  npx sequelize::migrate
+  ```
+5. **Set up environment variables:**
 
 Create a .env file in the backend directory and add the necessary configurations (refer to .env.example for a template).
 
-5. **Start the server:
+6. **Start the server:**
 
   ```bash
 
@@ -67,17 +72,26 @@ Create a .env file in the backend directory and add the necessary configurations
 
 The server will start running on the port designated by the .env.
 
-6. **Navigate to the boggle-frontend directory
+7. **Navigate to the boggle-frontend directory**
    
  ```bash
   npm install
   ```
 
-8. ** And run the front end
+8. ** And run the front end **
 
 ```bash
   npm start
 ```
+
+
+## Issues and Improvements
+
+- Upon leaving a lobby by manually closing the website as a user, the socket does not update and remove the user from the lobby. The fix requires an action on window unload from the react frontend.
+- Inputting a newly created room lobby key URL sometimes does not allow users to join the room if they just logged in. A useEffect tracking the state of the context of the user credentials is required in the react frontend
+-  The socket server reciever functions should be moved into their own file for readability. 
+
+
 
 
 
