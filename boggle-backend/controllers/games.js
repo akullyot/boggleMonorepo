@@ -105,8 +105,7 @@ games.post('/findallwords', async(req,res) => {
     const results = [];
     let board = req.body.boardMatrix.flat();
     let size =  Math.sqrt(board.length); //I only ever do square boards
-    //NOTE: this function was heavily helped/ basically just reworked slightly from looking at pf-sowpod's source code,
-    // eventually I want to make this from scratch but getting the recursion right was difficult in the time constraint
+    //NOTE: this function was heavily helped from looking at pf-sowpod's source code,
     function recursiveSolve (index, trieNode, path, sequence) {
         // Dont retrace
         if (sequence.indexOf(index) !== -1) {return}
